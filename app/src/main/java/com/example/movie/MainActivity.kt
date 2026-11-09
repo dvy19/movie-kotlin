@@ -20,28 +20,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             MovieTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    MainScreen(innerPadding)
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+sealed class Screens(val route: String){
+    object Register: Screens("register")
+    object Login: Screens("login")
+    object HomeScreen: Screens("home")
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MovieTheme {
-        Greeting("Android")
-    }
+
 }
