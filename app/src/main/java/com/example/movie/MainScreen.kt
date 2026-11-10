@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.movie.screens.AddPostScreen
 import com.example.movie.screens.HomeScreen
 import com.example.movie.screens.MovieGridScreen
 
@@ -61,5 +62,15 @@ fun MainScreen(
 
 
             }
-        }}
+
+            composable(Screens.AddPostScreen.route) {
+                AddPostScreen(
+                    mainNavController=mainNavController,
+                    onNavigateBack = { mainNavController.popBackStack() },
+                )
+            }
+
+
+        }
+    }
 }

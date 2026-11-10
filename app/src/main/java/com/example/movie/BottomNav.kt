@@ -89,6 +89,13 @@ fun BottomNav(
                     mainNavController.navigate(Screens.ChatScreen.route)
                 }
 
+                BottomItem(
+                    icon = Icons.Default.Home,
+                    selected = currentRoute == Screens.AddPostScreen.route
+                ) {
+                    mainNavController.navigate(Screens.AddPostScreen.route)
+                }
+
 
             }
         }

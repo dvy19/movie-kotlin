@@ -1,6 +1,7 @@
 package com.example.movie
 
 
+import com.example.movie.community.CommApiInterface
 import com.example.movie.movie.MovieApiInterface
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -27,7 +28,10 @@ object ApiClient {
 
     val movieAPI : MovieApiInterface by lazy{
         retrofit.create(MovieApiInterface::class.java)
+    }
 
+    val commApi: CommApiInterface by lazy{
+        retrofit.create(CommApiInterface::class.java)
     }
 
 }
