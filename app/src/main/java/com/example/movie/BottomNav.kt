@@ -75,6 +75,20 @@ fun BottomNav(
                     mainNavController.navigate(Screens.HomeScreen.route)
                 }
 
+                BottomItem(
+                    icon = Icons.Default.Home,
+                    selected = currentRoute == Screens.MovieGridScreen.route
+                ) {
+                    mainNavController.navigate(Screens.MovieGridScreen.route)
+                }
+
+                BottomItem(
+                    icon = Icons.Default.Home,
+                    selected = currentRoute == Screens.ChatScreen.route
+                ) {
+                    mainNavController.navigate(Screens.ChatScreen.route)
+                }
+
 
             }
         }
