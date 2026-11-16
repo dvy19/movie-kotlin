@@ -13,8 +13,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.movie.screens.AddPostScreen
+import com.example.movie.screens.AllUsersScreen
 import com.example.movie.screens.HomeScreen
 import com.example.movie.screens.MovieGridScreen
+import com.example.movie.screens.sampleUsers
 
 @Composable
 fun MainScreen(
@@ -61,6 +63,14 @@ fun MainScreen(
                 )
 
 
+            }
+
+            composable(Screens.AllUsersScreen.route){
+                AllUsersScreen(
+                    mainNavController,
+                    users = sampleUsers,
+                    onMessageClick = { }
+                )
             }
 
             composable(Screens.AddPostScreen.route) {

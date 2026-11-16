@@ -85,7 +85,7 @@ fun AddPostScreen(
                         onClick = {
                             if (isFormValid && !isSubmitting) {
                                 isSubmitting = true
-                                onSubmitPost(title.trim(), content.trim(), selectedImageUri)
+                                //onSubmitPost(title.trim(), content.trim(), selectedImageUri)
                             }
                         },
                         enabled = isFormValid && !isSubmitting,

@@ -341,7 +341,7 @@ fun HomeScreen(
                         actionIconContentColor = Color.Black
                     ),
                     actions = {
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = { mainNavController.navigate("all_users")}) {
                             Icon(
                                 imageVector = Icons.Default.Message,
                                 contentDescription = "Messages"

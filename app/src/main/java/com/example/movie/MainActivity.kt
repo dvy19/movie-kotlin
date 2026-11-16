@@ -38,6 +38,9 @@ sealed class Screens(val route: String){
 
     data object AddPostScreen:Screens("add_post")
 
+    data object AllUsersScreen:Screens("all_users")
+
+
 
 
 
