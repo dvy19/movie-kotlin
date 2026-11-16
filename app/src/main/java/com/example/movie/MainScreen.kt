@@ -15,7 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.movie.screens.AddPostScreen
 import com.example.movie.screens.AllUsersScreen
 import com.example.movie.screens.HomeScreen
+import com.example.movie.screens.MovieFeedScreen
 import com.example.movie.screens.MovieGridScreen
+import com.example.movie.screens.sampleMoviePosts
 import com.example.movie.screens.sampleUsers
 
 @Composable
@@ -64,6 +66,16 @@ fun MainScreen(
 
 
             }
+
+            composable(Screens.MovieFeedScreen.route){
+                MovieFeedScreen(
+                    posts = sampleMoviePosts,
+                    onCommentClick = { },
+                    onLikeToggle = { _, _ -> },
+                    onNewPostClick = { }
+                )
+            }
+
 
             composable(Screens.AllUsersScreen.route){
                 AllUsersScreen(

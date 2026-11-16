@@ -77,9 +77,9 @@ fun BottomNav(
 
                 BottomItem(
                     icon = Icons.Default.Home,
-                    selected = currentRoute == Screens.MovieGridScreen.route
+                    selected = currentRoute == Screens.MovieFeedScreen.route
                 ) {
-                    mainNavController.navigate(Screens.MovieGridScreen.route)
+                    mainNavController.navigate(Screens.MovieFeedScreen.route)
                 }
 
                 BottomItem(

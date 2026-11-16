@@ -40,6 +40,9 @@ sealed class Screens(val route: String){
 
     data object AllUsersScreen:Screens("all_users")
 
+    data object MovieFeedScreen:Screens("movie_feed")
+
+
 
 
 
