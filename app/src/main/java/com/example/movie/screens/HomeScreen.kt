@@ -55,62 +55,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movie.Screens
-import com.example.movie.components.Genre
 import com.example.movie.components.GenreHorizontalList
 import com.example.movie.components.MovieVerticalList
+import com.example.movie.movie.GetGenreState
 import com.example.movie.movie.Movie
+import com.example.movie.movie.MovieVM
 import com.example.movie.movie.PopularMovie
 import kotlinx.coroutines.launch
 
 
 
-val sampleGenres = listOf(
-    Genre(
-        id = 28,
-        name = "Action",
-        imageUrl = "https://image.tmdb.org/t/p/w500/3V4kSt8aL9DODvhwIQLD me standard/9FE5eD92WfVCiivM9Pq9GVSrlWk.jpg" // Dark Knight backdrop
-    ),
-    Genre(
-        id = 12,
-        name = "Adventure",
-        imageUrl = "https://image.tmdb.org/t/p/w500/8Y4PKa4aySuvhqebzqPRpE1sBl7.jpg"
-    ),
-    Genre(
-        id = 16,
-        name = "Animation",
-        imageUrl = "https://image.tmdb.org/t/p/w500/sl5NJ1vtyhP9Vr88bB4blULsJYp.jpg"
-    ),
-    Genre(
-        id = 35,
-        name = "Comedy",
-        imageUrl = "https://image.tmdb.org/t/p/w500/2Lqa15A8G2y8w0a88ld2wL4.jpg"
-    ),
-    Genre(
-        id = 80,
-        name = "Crime",
-        imageUrl = "https://image.tmdb.org/t/p/w500/hZkgoQY85KGdfW28qW2vjf.jpg"
-    ),
-    Genre(
-        id = 18,
-        name = "Drama",
-        imageUrl = "https://image.tmdb.org/t/p/w500/9fqk2w423J41l3A87K.jpg"
-    ),
-    Genre(
-        id = 27,
-        name = "Horror",
-        imageUrl = "https://image.tmdb.org/t/p/w500/7I928f5A93K7S421L8.jpg"
-    ),
-    Genre(
-        id = 878,
-        name = "Sci-Fi",
-        imageUrl = "https://image.tmdb.org/t/p/w500/xJHokMbljvjADYdit5fK5VvG3io.jpg"
-    ),
-    Genre(
-        id = 53,
-        name = "Thriller",
-        imageUrl = "https://image.tmdb.org/t/p/w500/vL5LR6VwqZFCrT0m2n82p.jpg"
-    )
-)
 
 val sampleMovies = listOf(
     PopularMovie(
@@ -176,6 +130,16 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(
         initialValue = DrawerValue.Closed
     )
+
+    val viewModel: MovieVM = viewModel()
+
+    val getGenreState by viewModel.genreState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.get_genres()
+    }
+
+
 
     val scope = rememberCoroutineScope()
 
@@ -377,15 +341,38 @@ fun HomeScreen(
                 }
 
                 item{
-                    GenreHorizontalList(
-                        genres = sampleGenres,
 
-                        onGenreClick = {
-                            // Handle genre click here
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    when(val state=getGenreState){
+
+                        is GetGenreState.Loading -> {
+                            CircularProgressIndicator()
+                        }
+                        is GetGenreState.Success -> {
+
+                            val genres = state.data
+                            GenreHorizontalList(
+                                genres = genres,
+
+                                onGenreClick = {
+                                    // Handle genre click here
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        is GetGenreState.Error -> {
+                            Text(text = state.message)
+                        }
+
+                        else -> {
+
+                        }
+
+
+
                 }
+                    }
+
 
                 item{
                     Row(

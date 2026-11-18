@@ -7,10 +7,10 @@ import retrofit2.http.Query
 
 interface MovieApiInterface{
 
-    @GET("api/movies/get-genre/")
+    @GET("movies/get-genre/")
     suspend fun getGenre(): Response<MovieGenreResponse>
 
-    @GET("movies/genre/{genre_id}/")
+    @GET("/movies/genre/{genre_id}/")
     suspend fun getMoviesByGenre(
         @Path("genre_id") genreId: Int,
         @Query("page") page: Int = 1,

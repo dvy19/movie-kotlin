@@ -1,5 +1,6 @@
 package com.example.movie.movie
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +81,12 @@ class MovieVM : ViewModel() {
 
             try {
                 val response = repo.getGenre()
+
+                Log.d("MovieVM genre", "Response body: ${response.body()}")
+                Log.d("MovieVM genre", "Response isSuccessful: ${response.isSuccessful}")
+                Log.d("MovieVM genre", "Response code: ${response.code()}")
+                Log.d("MovieVM genre", "Response message: ${response.message()}")
+
 
                 if (response.isSuccessful) {
                     response.body()?.let {

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
-    private const val BASE_URL = "https://waste-management-hiay.onrender.com/"
+    private const val BASE_URL = "https://movie-app-backend-zvyr.onrender.com/api/"
 
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
