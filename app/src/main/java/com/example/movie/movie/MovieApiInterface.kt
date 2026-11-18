@@ -20,7 +20,7 @@ interface MovieApiInterface{
     @GET("movies/popular/")
     suspend fun getPopularMovies(
         @Query("page") page: Int = 1
-    ): PopularMovie
+    ): Response<PopularMovieResponse>
 
 
 }

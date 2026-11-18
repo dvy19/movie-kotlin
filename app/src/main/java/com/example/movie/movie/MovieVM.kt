@@ -3,6 +3,11 @@ package com.example.movie.movie
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.movie.room.CacheRepo
+import com.example.movie.room.CacheViewModel
+import com.example.movie.room.DatabaseProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +29,7 @@ sealed class GetMoviesByGenreState{
 }
 
 sealed class GetPopularMoviesState{
-    data class Success(val data: PopularMovie): GetPopularMoviesState()
+    data class Success(val data: PopularMovieResponse): GetPopularMoviesState()
     data class Error(val message: String): GetPopularMoviesState()
     object Loading: GetPopularMoviesState()
     object Empty: GetPopularMoviesState()
@@ -42,6 +47,9 @@ class MovieVM : ViewModel() {
 
     private val _popularMoviesState = MutableStateFlow<GetPopularMoviesState>(GetPopularMoviesState.Empty)
     val popularMoviesState: StateFlow<GetPopularMoviesState> = _popularMoviesState.asStateFlow()
+
+
+
 
 
     fun get_movies_by_genre(
@@ -116,10 +124,10 @@ class MovieVM : ViewModel() {
                 val response = repo.getPopularMovies(
                     page = page
                 )
-                if (response.isSuccess) {
-                    response.getOrNull()?.let {
-                        _popularMoviesState.value = GetPopularMoviesState.Success(it)
-                        } ?: throw Exception("Response body is null")
+                if (response.isSuccessful && response.body()!=null) {
+
+                    _popularMoviesState.value= GetPopularMoviesState.Success(response.body()!!)
+
                 } else {
                     throw Exception("Failed to fetch data")
                 }

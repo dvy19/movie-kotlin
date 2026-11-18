@@ -31,15 +31,12 @@ class MovieRepo {
 
     suspend fun getPopularMovies(
         page: Int = 1
-    ): Result<PopularMovie> {
-        return try {
-            val response = api.getPopularMovies(
-                page = page
-            )
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    ): Response<PopularMovieResponse> {
+
+        return api.getPopularMovies(
+            page = page
+        )
+
     }
 
 }

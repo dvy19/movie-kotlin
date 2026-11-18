@@ -3,8 +3,6 @@ package com.example.movie.screens
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-
-
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -58,9 +56,16 @@ import com.example.movie.Screens
 import com.example.movie.components.GenreHorizontalList
 import com.example.movie.components.MovieVerticalList
 import com.example.movie.movie.GetGenreState
+import com.example.movie.movie.GetPopularMoviesState
 import com.example.movie.movie.Movie
 import com.example.movie.movie.MovieVM
 import com.example.movie.movie.PopularMovie
+import com.example.movie.room.CacheRepo
+import com.example.movie.room.CacheViewModel
+import com.example.movie.room.CacheVmFac
+import com.example.movie.room.DatabaseProvider
+import com.example.movie.room.GenreEntity
+import com.example.movie.room.GetCacheGenreState
 import kotlinx.coroutines.launch
 
 
@@ -135,15 +140,61 @@ fun HomeScreen(
 
     val getGenreState by viewModel.genreState.collectAsState()
 
+    val popularMoviesState by viewModel.popularMoviesState.collectAsState()
+
+    val context = LocalContext.current
+
+    // Now LocalContext.current works because you are inside a Composable!
+    val cacheViewModel: CacheViewModel = viewModel(
+        factory = CacheVmFac(
+            repository = CacheRepo(
+                genreDao = DatabaseProvider.getDatabase(context).genreDao()
+            )
+        )
+    )
+
+    val genreState by cacheViewModel.getGenre.collectAsState()
+
+
     LaunchedEffect(Unit) {
-        viewModel.get_genres()
+        cacheViewModel.get_genre()
     }
+
+    when(val state=genreState){
+        is GetCacheGenreState.Loading -> {
+            CircularProgressIndicator()
+        }
+
+        is GetCacheGenreState.Success -> {
+            val genres = state.data
+
+            if(genres.isEmpty()){
+                LaunchedEffect(Unit) {
+                    viewModel.get_genres()
+                }
+            }
+        }
+        is GetCacheGenreState.Error -> {
+            Text(text = state.message)
+        }
+        else -> {
+
+        }
+    }
+
+    LaunchedEffect(Unit) {
+
+
+
+        viewModel.get_popular_movies()
+    }
+
+
 
 
 
     val scope = rememberCoroutineScope()
 
-    val context = LocalContext.current
 
 
     ModalNavigationDrawer(
@@ -350,6 +401,18 @@ fun HomeScreen(
                         is GetGenreState.Success -> {
 
                             val genres = state.data
+
+                            val genreEntities = genres.genres.map { movieGenre ->
+                                GenreEntity(
+                                    id = movieGenre.id,
+                                    name = movieGenre.name
+                                )
+                            }
+
+                            // 2. Pass the converted list to your cache ViewModel
+                            cacheViewModel.insertGenres(genreEntities)
+
+
                             GenreHorizontalList(
                                 genres = genres,
 
@@ -401,10 +464,26 @@ fun HomeScreen(
                             )
                         }
                     }
-                    MovieVerticalList(
-                        movies = sampleMovies,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+
+                    when(val state=popularMoviesState){
+                        is GetPopularMoviesState.Loading -> {
+                            CircularProgressIndicator()
+                        }
+
+                        is GetPopularMoviesState.Success -> {
+                            val movies = state.data
+                            MovieVerticalList(
+                                movies = movies.results.take(6),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        is GetPopularMoviesState.Error -> {
+                            Text(text = state.message)
+                        }
+                        else -> {
+
+                        }
+                    }
                 }
 
 

@@ -132,6 +132,65 @@ data class Movie(
     val voteCount: Int
 )
 
+/* popular movie response
+
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/yE766yhgg98tKwTKd8CyNvAtmn6.jpg",
+      "genre_ids": [
+        12,
+        53
+      ],
+      "id": 1263337,
+      "title": "Heart of the Beast",
+      "original_language": "en",
+      "original_title": "Heart of the Beast",
+      "overview": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
+      "popularity": 507.5043,
+      "poster_path": "/6sYemVUn79UPKz1ZsSG6kPU4RVy.jpg",
+      "release_date": "2026-09-19",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.696,
+      "vote_count": 973
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/c7btGYblBnfAaw713WvFM0Kimc7.jpg",
+      "genre_ids": [
+        12,
+        28,
+        14
+      ],
+      "id": 1368337,
+      "title": "The Odyssey",
+      "original_language": "en",
+      "original_title": "The Odyssey",
+      "overview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
+      "popularity": 478.6101,
+      "poster_path": "/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+      "release_date": "2026-07-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.024,
+      "vote_count": 5040
+    },
+ ]
+}
+
+ */
+
+data class PopularMovieResponse(
+    val page:Int,
+    val results: List<PopularMovie>,
+    @SerializedName("total_pages")
+    val totalPages: Int,
+    @SerializedName("total_results")
+    val totalResults: Int
+)
 
 data class PopularMovie(
     val adult: Boolean,

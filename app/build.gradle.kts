@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.ksp)
+
 }
 
 android {
@@ -40,6 +42,18 @@ android {
 }
 dependencies {
     // AndroidX & Compose (managed via Version Catalog or BOM)
+
+    val roomVersion = "2.6.1"
+
+    // Room Runtime & Kotlin Extensions (Coroutines support)
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // KSP annotation processor (generates Room implementation code)
+    //implementation("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
