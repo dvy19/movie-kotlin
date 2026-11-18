@@ -42,6 +42,8 @@ sealed class Screens(val route: String){
 
     data object MovieFeedScreen:Screens("movie_feed")
 
+    data object ProfileScreen:Screens("profile")
+
 
 
 

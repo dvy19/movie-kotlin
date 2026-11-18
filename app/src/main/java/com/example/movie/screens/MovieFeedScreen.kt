@@ -5,12 +5,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.example.movie.Screens
 import com.example.movie.components.MoviePost
 import com.example.movie.components.MoviePostCard
 
@@ -18,6 +21,7 @@ import com.example.movie.components.MoviePostCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieFeedScreen(
+    mainNavController: NavHostController,
     posts: List<MoviePost> = sampleMoviePosts,
     onCommentClick: (MoviePost) -> Unit = {},
     onLikeToggle: (MoviePost, Boolean) -> Unit = { _, _ -> },
@@ -32,6 +36,15 @@ fun MovieFeedScreen(
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
                     )
+                },
+                actions = {
+                    IconButton(onClick = {mainNavController.navigate(Screens.ChatScreen.route)}) {
+                        Icon(
+                            imageVector = Icons.Default.MailOutline, // Or Icons.Default.ChatBubbleOutline / Icons.Default.Send
+                            contentDescription = "Message Inbox",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer

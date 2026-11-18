@@ -17,7 +17,9 @@ import com.example.movie.screens.AllUsersScreen
 import com.example.movie.screens.HomeScreen
 import com.example.movie.screens.MovieFeedScreen
 import com.example.movie.screens.MovieGridScreen
+import com.example.movie.screens.ProfileScreen
 import com.example.movie.screens.sampleMoviePosts
+import com.example.movie.screens.sampleUser
 import com.example.movie.screens.sampleUsers
 
 @Composable
@@ -69,10 +71,21 @@ fun MainScreen(
 
             composable(Screens.MovieFeedScreen.route){
                 MovieFeedScreen(
+                    mainNavController,
                     posts = sampleMoviePosts,
                     onCommentClick = { },
                     onLikeToggle = { _, _ -> },
-                    onNewPostClick = { }
+                    onNewPostClick = { mainNavController.navigate(Screens.AddPostScreen.route)}
+                )
+            }
+
+            composable(Screens.ProfileScreen.route){
+                ProfileScreen(
+                    user = sampleUser,
+                    userPosts = sampleMoviePosts,
+                    onSettingsClick = { },
+                    mainNavController
+
                 )
             }
 

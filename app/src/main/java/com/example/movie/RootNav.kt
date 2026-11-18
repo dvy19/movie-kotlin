@@ -23,7 +23,15 @@ fun RootNav(innerPadding: PaddingValues) {
     ) {
 
         composable(Screens.Register.route){
-            Register(rootNavController)
+            Register(
+                rootNavController,
+                onSignUpClicked = { email, password ->
+                    //rootNavController.navigate(Screens.Login.route)
+                },
+                onLoginClicked = {
+                    //rootNavController.navigate(Screens.Login.route)
+                }
+            )
         }
 
         composable(Screens.Login.route){
