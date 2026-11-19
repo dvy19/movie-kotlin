@@ -1,6 +1,7 @@
 package com.example.movie
 
 
+import com.example.movie.auth.AuthInterface
 import com.example.movie.community.CommApiInterface
 import com.example.movie.movie.MovieApiInterface
 import okhttp3.OkHttpClient
@@ -25,6 +26,10 @@ object ApiClient {
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
         .build()
+
+    val authAPI : AuthInterface by lazy{
+        retrofit.create(AuthInterface::class.java)
+    }
 
     val movieAPI : MovieApiInterface by lazy{
         retrofit.create(MovieApiInterface::class.java)

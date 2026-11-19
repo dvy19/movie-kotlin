@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -27,18 +28,33 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Register(
     rootNavController: NavHostController,
-    onSignUpClicked: (String, String) -> Unit,
     onLoginClicked: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val context= LocalContext.current
+
+    val sessionManager=SessionManager(context)
+
+    val repo=AuthRepo(sessionManager)
+
+    val viewModel : AuthVM=viewModel()
+
+    val registerState by viewModel.registerState.collectAsState()
+
+
+
+
+
 
     Box(
         modifier = Modifier
@@ -134,7 +150,14 @@ fun Register(
 
             // Submit / Sign Up Button
             Button(
-                onClick = { onSignUpClicked(email, password) },
+                onClick = {
+                    viewModel.registerUser(
+                        RegisterReq(
+                            email=email,
+                            password=password
+                        )
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -144,10 +167,27 @@ fun Register(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Text(
-                    text = "Create Account",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
+
+                when(val state=registerState){
+                    is RegisterState.Idle -> {
+                        Text(text = "Sign Up")
+                    }
+                    is RegisterState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    is RegisterState.Success -> {
+                        Text(text = "Sign Up")
+
+                        rootNavController.navigate("main")
+                    }
+                    is RegisterState.Error -> {
+                        Text(text = state.message)
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
