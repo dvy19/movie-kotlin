@@ -1,6 +1,7 @@
 package com.example.movie.screens
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -22,11 +23,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.movie.community.AddPostState
+import com.example.movie.community.CommRepo
+import com.example.movie.community.CommVMFac
+import com.example.movie.community.CommViewModel
+import com.example.movie.createImagePart
 
 // --- Cinematic Dark Theme Color Palette ---
 val MovieDarkBackground = Color(0xFF0D0E12)
@@ -48,6 +56,35 @@ fun AddPostScreen(
     var content by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isSubmitting by remember { mutableStateOf(false) }
+
+
+    val viewModel: CommViewModel = viewModel(
+        factory = CommVMFac(
+            repository = CommRepo()
+        )
+    )
+
+    val context= LocalContext.current
+
+    val addPostState by viewModel.addPostState.collectAsState()
+
+    when(val state=addPostState){
+        is AddPostState.Idle -> {
+
+        }
+        is AddPostState.Loading -> {
+        }
+        is AddPostState.Success -> {
+            Toast.makeText(context, "Post added successfully", Toast.LENGTH_SHORT).show()
+
+        }
+        is AddPostState.Error -> {
+            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+        }
+
+
+    }
+
 
     // Image Picker Launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -83,9 +120,27 @@ fun AddPostScreen(
                 actions = {
                     TextButton(
                         onClick = {
+
+                            val imagePart =
+                                selectedImageUri?.let {
+
+                                    createImagePart(
+                                        context,
+                                        it
+                                    )
+
+                                }
+
                             if (isFormValid && !isSubmitting) {
                                 isSubmitting = true
-                                //onSubmitPost(title.trim(), content.trim(), selectedImageUri)
+
+                                viewModel.add_post(
+                                    title = title,
+                                    content = content,
+                                    image = imagePart,
+                                    category = "Indie Gem"
+                                )
+
                             }
                         },
                         enabled = isFormValid && !isSubmitting,

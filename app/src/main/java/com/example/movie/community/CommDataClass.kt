@@ -62,6 +62,4 @@ data class PostResponse(
     var likes_count:Int,
     var comments_count:Int,
     var user:Int
-
-
 )

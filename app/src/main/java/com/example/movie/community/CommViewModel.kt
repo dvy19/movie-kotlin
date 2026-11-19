@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 
 
 sealed class AddPostState{
@@ -13,20 +14,31 @@ sealed class AddPostState{
     data class Success(val data: PostResponse) : AddPostState()
     data class Error(val message: String) : AddPostState()
 }
-class CommViewModel : ViewModel() {
+class CommViewModel(
+    private val repo: CommRepo
+) : ViewModel() {
 
-    private val repo = CommRepo()
 
     private val _addPostState = MutableStateFlow<AddPostState>(AddPostState.Idle)
     val addPostState = _addPostState.asStateFlow()
 
-    fun add_post(req: PostRequest){
+    fun add_post(
+        title:String,
+        content:String,
+        image: MultipartBody.Part?,
+        category:String
+    ){
 
         _addPostState.value = AddPostState.Loading
 
         viewModelScope.launch {
             try {
-                val response = repo.addPost(req)
+                val response = repo.addPost(
+                    title=title,
+                    content=content,
+                    image=image,
+                    category=category
+                )
 
                 if(response.isSuccessful && response.body()!=null) {
                     _addPostState.value= AddPostState.Success(response.body()!!)
