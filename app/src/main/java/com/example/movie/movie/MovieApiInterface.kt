@@ -27,5 +27,11 @@ interface MovieApiInterface{
         @Path("movie_id") movieId: String
     ): Response<PopularMovie>
 
+    @GET("movies/search/")
+    suspend fun searchMovies(
+        @Query("query") query: String,
+        @Query("page") page: Int = 1
+    ): Response<PopularMovieResponse>
+
 
 }

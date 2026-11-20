@@ -44,6 +44,7 @@ sealed class MovieDetailState{
 }
 
 
+
 class MovieVM : ViewModel() {
 
     private val repo = MovieRepo()
@@ -59,6 +60,9 @@ class MovieVM : ViewModel() {
 
     private val _movieDetailState = MutableStateFlow<MovieDetailState>(MovieDetailState.Idle)
     val movieDetailState: StateFlow<MovieDetailState> = _movieDetailState.asStateFlow()
+
+
+
 
 
 
@@ -175,6 +179,36 @@ class MovieVM : ViewModel() {
         }
 
     }
+
+    fun search_movies(
+        query: String,
+        page: Int = 1
+        ){
+        _popularMoviesState.value = GetPopularMoviesState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repo.searchMovies(
+                    query = query,
+                    page = page
+                )
+
+                Log.d("MovieVM genre", "Response body: ${response.body()}")
+                Log.d("MovieVM genre", "Response isSuccessful: ${response.isSuccessful}")
+                Log.d("MovieVM genre", "Response code: ${response.code()}")
+                Log.d("MovieVM genre", "Response message: ${response.message()}")
+
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        _popularMoviesState.value = GetPopularMoviesState.Success(it)
+                    } ?: throw Exception("Response body is null")
+                } else {
+                    throw Exception("Failed to fetch data")
+                }
+            } catch (e: Exception) {
+                _popularMoviesState.value = GetPopularMoviesState.Error(e.message ?: "An error occurred")
+            }
+        }
+            }
 
 }
 

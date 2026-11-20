@@ -473,6 +473,7 @@ fun HomeScreen(
                         is GetPopularMoviesState.Success -> {
                             val movies = state.data
                             MovieVerticalList(
+                                mainNavController,
                                 movies = movies.results.take(6),
                                 modifier = Modifier.fillMaxWidth()
                             )

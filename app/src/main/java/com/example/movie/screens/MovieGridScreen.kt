@@ -41,7 +41,20 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.movie.movie.MovieVM
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.movie.movie.GetPopularMoviesState
+import com.example.movie.movie.PopularMovie
 
 val sampleGridMovies = listOf(
     Movie(
@@ -117,68 +130,123 @@ val sampleGridMovies = listOf(
 @Composable
 fun MovieGridScreen(
     mainNavController: NavController,
-    movies: List<Movie>,
+
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var submittedQuery by rememberSaveable { mutableStateOf("") }
 
-    // Filter movies based on search query (case-insensitive)
-    val filteredMovies = remember(movies, searchQuery) {
-        if (searchQuery.isBlank()) {
-            movies
-        } else {
-            movies.filter { it.title.contains(searchQuery, ignoreCase = true) }
+    val vm: MovieVM = viewModel()
+    val moviesState by vm.popularMoviesState.collectAsStateWithLifecycle()
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) {
+        vm.get_popular_movies(page = 1)
+    }
+
+    val onQueryChange: (String) -> Unit = { newQuery ->
+        searchQuery = newQuery
+        if (newQuery.isBlank() && submittedQuery.isNotBlank()) {
+            submittedQuery = ""
+            vm.get_popular_movies(page = 1) // Restore popular movies when cleared
         }
     }
 
+    val triggerSearch: () -> Unit = {
+        val trimmed = searchQuery.trim()
+        if (trimmed.isNotEmpty()) {
+            submittedQuery = trimmed
+            vm.search_movies(query = trimmed) // Writes into the same state
+            keyboardController?.hide()
+            focusManager.clearFocus()
+        }
+    }
+
+
+
+
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color(0xFF121212), // Dark movie app background
+        containerColor = Color(0xFF121212),
         topBar = {
-            // Top Search Bar Container
             Surface(
                 color = Color(0xFF121212),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = {
-                        Text("Search movies...", color = Color.Gray)
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search Icon",
-                            tint = Color(0xFFE50914) // Cinematic red accent
-                        )
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear Search",
-                                    tint = Color.Gray
-                                )
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFE50914),
-                        unfocusedBorderColor = Color(0xFF333333),
-                        focusedContainerColor = Color(0xFF1E1E1E),
-                        unfocusedContainerColor = Color(0xFF1E1E1E),
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        cursorColor = Color(0xFFE50914)
-                    ),
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                )
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = {
+                            Text("Search movies...", color = Color.Gray)
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search Icon",
+                                tint = Color(0xFFE50914)
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(
+                                    onClick = {
+                                        searchQuery = ""
+                                        // Optional: viewModel.loadDefaultMovies()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear Search",
+                                        tint = Color.Gray
+                                    )
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Search
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSearch = { triggerSearch() }
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFE50914),
+                            unfocusedBorderColor = Color(0xFF333333),
+                            focusedContainerColor = Color(0xFF1E1E1E),
+                            unfocusedContainerColor = Color(0xFF1E1E1E),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            cursorColor = Color(0xFFE50914)
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Button(
+                        onClick = triggerSearch,
+                        enabled = searchQuery.isNotBlank(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFE50914),
+                            contentColor = Color.White,
+                            disabledContainerColor = Color(0xFF2C2C2C),
+                            disabledContentColor = Color.Gray
+                        ),
+                        modifier = Modifier.height(56.dp) // Matches standard OutlinedTextField height
+                    ) {
+                        Text("Search")
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -191,15 +259,69 @@ fun MovieGridScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(sampleGridMovies, key = { it.id }) { movie ->
-                MovieGridCard(movie = movie)
+
+            when (val state = moviesState) {
+
+                is GetPopularMoviesState.Error -> {
+                    item{
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Error: ${state.message}")
+                        }
+                    }
+                }
+
+                is GetPopularMoviesState.Loading -> {
+                    item{
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                is GetPopularMoviesState.Empty -> {
+                    item{
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                if (submittedQuery.isBlank()) "No movies to display"
+                                else "No results found for \"$submittedQuery\""
+                            )
+                        }
+                    }
+                }
+
+                is GetPopularMoviesState.Success -> {
+                    val movies = state.data.results
+                    // Render popular movies when submittedQuery.isBlank(),
+                    // or matching search result card(s) when searching
+
+                    items(movies, key = { it.id }) { movie ->
+                        MovieGridCard(
+                            onItemClick = {
+                                mainNavController.navigate("movie_detail/${movie.id}")
+                            },
+                            movie = movie)
+                    }
+                }
             }
+
         }
     }
 }
 
 @Composable
-fun MovieGridCard(movie: Movie) {
+fun MovieGridCard(
+    onItemClick: (Movie) -> Unit = {},
+    movie: PopularMovie
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

@@ -55,7 +55,7 @@ fun MainScreen(
                 MovieGridScreen(
                     mainNavController,
                     modifier = Modifier,
-                    movies = emptyList()
+
                 )
             }
 

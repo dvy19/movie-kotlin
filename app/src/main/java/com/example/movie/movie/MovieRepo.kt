@@ -48,4 +48,14 @@ class MovieRepo {
 
     }
 
+    suspend fun searchMovies(
+        query: String,
+        page: Int = 1
+    ): Response<PopularMovieResponse> {
+        return api.searchMovies(
+            query = query,
+            page = page
+        )
+    }
+
 }
