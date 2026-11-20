@@ -22,5 +22,10 @@ interface MovieApiInterface{
         @Query("page") page: Int = 1
     ): Response<PopularMovieResponse>
 
+    @GET("/movies/{movie_id}/")
+    suspend fun getMovieDetails(
+        @Path("movie_id") movieId: String
+    ): Response<PopularMovie>
+
 
 }

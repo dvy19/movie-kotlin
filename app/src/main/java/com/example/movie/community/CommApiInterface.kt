@@ -3,16 +3,18 @@ package com.example.movie.community
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface CommApiInterface {
 
     @Multipart
-    @POST("api/movies/post")
+    @POST("movies/posts")
     suspend fun addPost(
         @Header("Authorization") token: String,
 
@@ -22,6 +24,24 @@ interface CommApiInterface {
         @Part image:MultipartBody.Part?
 
     ): Response<PostResponse>
+
+    @GET("movies/posts/")
+    suspend fun getAllPosts(
+        @Header("Authorization") token: String,
+        //@Query("page") page: Int,
+        @Query("category") category: String?=null
+    ) : Response<PostResponse>
+
+    @GET("movies/posts/me")
+    suspend fun getMyPosts(
+        @Header("Authorization") token: String,
+        //@Query("page") page: Int,
+        @Query("category") category: String?=null
+    ) : Response<List<Post>>
+
+
+
+
 
 
 }

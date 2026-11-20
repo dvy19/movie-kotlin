@@ -10,18 +10,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 // Note: Ensure Coil is added to your dependencies if loading network images:
 // implementation("io.coil-kt:coil-compose:2.6.0")
 import coil.compose.AsyncImage
+import com.example.movie.auth.SessionManager
+import com.example.movie.community.CommRepo
+import com.example.movie.community.CommVMFac
+import com.example.movie.community.CommViewModel
+import com.example.movie.community.GetMyPostsState
+import com.example.movie.components.MoviePostCard
 
 // Sample data classes matching typical user & post structures
 data class UserProfile(
@@ -40,13 +48,29 @@ val sampleUser = UserProfile(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <PostType> ProfileScreen(
+fun  ProfileScreen(
     user: UserProfile,
-    userPosts: List<PostType>,
+
     onSettingsClick: () -> Unit,
     // Pass your existing MoviePostCard composable or invoke it directly inside items()
    mainNavController: NavHostController,
 ) {
+
+    val context= LocalContext.current
+
+    val viewModel: CommViewModel = viewModel(
+        factory = CommVMFac(
+            repository = CommRepo(SessionManager(context))
+        )
+    )
+
+
+    val getMyPostsState by viewModel.getMyPostsState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.get_my_posts(category = null)
+    }
+
     Scaffold(
         containerColor = Color(0xFF121212),
         topBar = {
@@ -85,51 +109,82 @@ fun <PostType> ProfileScreen(
                 UserHeaderSection(user = user)
             }
 
-            // Section Divider & Feed Header
-            item {
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    HorizontalDivider(
-                        color = Color(0xFF2A2A2A),
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                    Text(
-                        text = "My Posts (${userPosts.size})",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFFE0E0E0),
-                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                    )
-                }
-            }
+
 
             // Scrollable User Posts Area
-            if (userPosts.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No movie posts yet.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
+
+
+            when (val state = getMyPostsState) {
+                is GetMyPostsState.Idle -> {
+
+                }
+
+                is GetMyPostsState.Loading -> {
+
+                }
+
+                is GetMyPostsState.Success -> {
+
+                    val posts = state.data
+
+                    // Section Divider & Feed Header
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            HorizontalDivider(
+                                color = Color(0xFF2A2A2A),
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                            Text(
+                                text = "My Posts (${posts.size})",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color(0xFFE0E0E0),
+                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+                            )
+                        }
+                    }
+
+                    if (posts.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 48.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No movie posts yet.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                        items(
+                            items = posts,
+                            key = { post -> post.id }
+                        ) { post ->
+                            MoviePostCard(
+                                post = post,
+                                //mainNavController = mainNavController
+                            )
+                        }
+
+
                     }
                 }
-            } else {
-                items(userPosts) { post ->
-                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        // Direct call to your existing component:
-                        // MoviePostCard(post = post)
-                        //postCardContent(post)
+
+                    is GetMyPostsState.Error -> {
+
                     }
+
+
                 }
             }
         }
     }
-}
+
+
 
 @Composable
 private fun UserHeaderSection(user: UserProfile) {

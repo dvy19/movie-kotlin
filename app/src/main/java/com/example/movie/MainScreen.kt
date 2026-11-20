@@ -8,17 +8,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.movie.Screens.MovieDetailScreen
 import com.example.movie.screens.AddPostScreen
 import com.example.movie.screens.AllUsersScreen
 import com.example.movie.screens.HomeScreen
+import com.example.movie.screens.MovieDetailScreen
 import com.example.movie.screens.MovieFeedScreen
 import com.example.movie.screens.MovieGridScreen
 import com.example.movie.screens.ProfileScreen
-import com.example.movie.screens.sampleMoviePosts
 import com.example.movie.screens.sampleUser
 import com.example.movie.screens.sampleUsers
 
@@ -56,6 +59,22 @@ fun MainScreen(
                 )
             }
 
+            composable(
+                route = MovieDetailScreen.route,
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+
+                val id = backStackEntry.arguments?.getString("id")
+
+                MovieDetailScreen(
+                    mainNavController = mainNavController,
+                    movie_id = id
+                )
+            }
             composable(Screens.ChatScreen.route) {
                 ChatScreen(
                     mainNavController,
@@ -72,9 +91,7 @@ fun MainScreen(
             composable(Screens.MovieFeedScreen.route){
                 MovieFeedScreen(
                     mainNavController,
-                    posts = sampleMoviePosts,
-                    onCommentClick = { },
-                    onLikeToggle = { _, _ -> },
+
                     onNewPostClick = { mainNavController.navigate(Screens.AddPostScreen.route)}
                 )
             }
@@ -82,10 +99,8 @@ fun MainScreen(
             composable(Screens.ProfileScreen.route){
                 ProfileScreen(
                     user = sampleUser,
-                    userPosts = sampleMoviePosts,
                     onSettingsClick = { },
                     mainNavController
-
                 )
             }
 

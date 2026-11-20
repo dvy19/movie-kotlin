@@ -35,6 +35,15 @@ sealed class GetPopularMoviesState{
     object Empty: GetPopularMoviesState()
 }
 
+
+sealed class MovieDetailState{
+    object Idle : MovieDetailState()
+    object Loading : MovieDetailState()
+    data class Success(val data: PopularMovie) : MovieDetailState()
+    data class Error(val message: String) : MovieDetailState()
+}
+
+
 class MovieVM : ViewModel() {
 
     private val repo = MovieRepo()
@@ -47,6 +56,10 @@ class MovieVM : ViewModel() {
 
     private val _popularMoviesState = MutableStateFlow<GetPopularMoviesState>(GetPopularMoviesState.Empty)
     val popularMoviesState: StateFlow<GetPopularMoviesState> = _popularMoviesState.asStateFlow()
+
+    private val _movieDetailState = MutableStateFlow<MovieDetailState>(MovieDetailState.Idle)
+    val movieDetailState: StateFlow<MovieDetailState> = _movieDetailState.asStateFlow()
+
 
 
 
@@ -136,5 +149,32 @@ class MovieVM : ViewModel() {
             }
         }
         }
+
+
+    fun get_movie_details(
+        movieId: String
+    ){
+
+        _movieDetailState.value = MovieDetailState.Loading
+
+
+        viewModelScope.launch {
+            try {
+                val response = repo.getMovieDetails(
+                    movieId = movieId
+                )
+                if (response.isSuccessful && response.body()!=null) {
+                    _movieDetailState.value= MovieDetailState.Success(response.body()!!)
+                } else {
+                    throw Exception("Failed to fetch data")
+
+                }
+                } catch (e: Exception) {
+                _movieDetailState.value = MovieDetailState.Error(e.message ?: "An error occurred")
+            }
+        }
+
+    }
+
 }
 

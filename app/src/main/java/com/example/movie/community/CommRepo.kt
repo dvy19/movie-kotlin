@@ -2,6 +2,7 @@ package com.example.movie.community
 
 import com.example.movie.ApiClient
 import com.example.movie.auth.SessionManager
+import com.example.movie.movie.PopularMovie
 import okhttp3.MultipartBody
 import retrofit2.Response
 
@@ -33,4 +34,25 @@ class CommRepo(
 
         )
     }
+
+    suspend fun getAllPosts(
+        category: String?
+    ): Response<PostResponse>{
+        return api.getAllPosts(
+            token="Bearer $token",
+            category=category
+        )
+
+    }
+
+    suspend fun getMyPosts(
+        category: String?
+    ): Response<List<Post>> {
+        return api.getMyPosts(
+            token = "Bearer $token",
+            category = category
+        )
+    }
+
+
 }

@@ -9,6 +9,13 @@ data class PostRequest(
 
 )
 
+
+
+data class PostUser(
+    var id:Int,
+    var email:String
+)
+
 /* Movie Post Response
 [
   {
@@ -53,7 +60,12 @@ data class PostRequest(
   }
 ]
  */
+
 data class PostResponse(
+    val data:List<Post>
+)
+
+data class Post(
     var id:Int,
     var title:String,
     var content:String,
@@ -61,5 +73,5 @@ data class PostResponse(
     var category:String,
     var likes_count:Int,
     var comments_count:Int,
-    var user:Int
+    var user: PostUser
 )

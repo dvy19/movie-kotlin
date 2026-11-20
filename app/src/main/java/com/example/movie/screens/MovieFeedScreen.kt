@@ -9,12 +9,20 @@ import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.movie.Screens
-import com.example.movie.components.MoviePost
+import com.example.movie.auth.SessionManager
+import com.example.movie.community.CommRepo
+import com.example.movie.community.CommVMFac
+import com.example.movie.community.CommViewModel
+import com.example.movie.community.GetAllPostsState
 import com.example.movie.components.MoviePostCard
 
 // 1. Parent Feed Screen Composable
@@ -22,11 +30,28 @@ import com.example.movie.components.MoviePostCard
 @Composable
 fun MovieFeedScreen(
     mainNavController: NavHostController,
-    posts: List<MoviePost> = sampleMoviePosts,
-    onCommentClick: (MoviePost) -> Unit = {},
-    onLikeToggle: (MoviePost, Boolean) -> Unit = { _, _ -> },
     onNewPostClick: () -> Unit = {}
 ) {
+
+
+    val context= LocalContext.current
+    val viewModel: CommViewModel = viewModel(
+        factory = CommVMFac(
+            repository = CommRepo(SessionManager(context))
+        )
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.get_all_posts(
+            category = null
+        )
+    }
+
+
+    val getAllPostsState by viewModel.getAllPostsState.collectAsState()
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -71,60 +96,77 @@ fun MovieFeedScreen(
             contentPadding = PaddingValues(vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(
-                items = posts,
-                key = { post -> post.id } // Stable keys for optimal LazyColumn recycling
-            ) { post ->
-                MoviePostCard(
-                    post = post,
-                    onCommentClick = { clickedPost -> onCommentClick(clickedPost) },
-                    onLikeToggle = { targetPost, isLiked -> onLikeToggle(targetPost, isLiked) }
-                )
+            when (val state = getAllPostsState) {
+                is GetAllPostsState.Idle -> {
+                    // Optional: show nothing or a subtle prompt while waiting to fetch
+                }
+
+                is GetAllPostsState.Loading -> {
+                    item(key = "loading") {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                is GetAllPostsState.Success -> {
+                    val posts = state.data.data // Use `state.data` if you switched Retrofit to List<Post>
+
+                    if (posts.isEmpty()) {
+                        item(key = "empty") {
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxSize()
+                                    .padding(24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No movie posts found.",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        items(
+                            items = posts,
+                            key = { post -> post.id }
+                        ) { post ->
+                            MoviePostCard(
+                                post = post,
+
+                            )
+                        }
+                    }
+                }
+
+                is GetAllPostsState.Error -> {
+                    item(key = "error") {
+                        Column(
+                            modifier = Modifier
+                                .fillParentMaxSize()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = state.message, // Adjust to your Error property name
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(onClick = {}) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
             }
         }
+
     }
 }
-
-// 2. Sample Data Source containing 4 diverse movie posts
-val sampleMoviePosts = listOf(
-    MoviePost(
-        id = 101,
-        authorName = "Vikramaditya Nair",
-        timeAgo = "2h ago",
-        category = "Sci-Fi Review",
-        title = "Dune: Part Two — A Masterclass in Sound & Scale",
-        content = "Denis Villeneuve delivers one of the most immersive theatrical experiences of the decade. The sandworm sequence alone justifies watching it on the largest screen possible, backed by Hans Zimmer's thunderous score.",
-        initialLikes = 248,
-        commentCount = 42
-    ),
-    MoviePost(
-        id = 102,
-        authorName = "Ananya Iyer",
-        timeAgo = "5h ago",
-        category = "Animation",
-        title = "The Boy and the Heron: Hayao Miyazaki's Poetic Farewell",
-        content = "A surreal, deeply personal journey through grief and imagination. It may lack the strict narrative linearity of Spirited Away, but every single frame feels like a hand-painted watercolor masterpiece.",
-        initialLikes = 189,
-        commentCount = 27
-    ),
-    MoviePost(
-        id = 103,
-        authorName = "Rohan Gupta",
-        timeAgo = "1d ago",
-        category = "Action / Thriller",
-        title = "Mad Max: Fury Road Still Holds the Crown for Practical Stunts",
-        content = "Rewatched it on the big screen last night. The sheer commitment to physical framing, real-world choreography, and minimal CGI makes modern blockbuster action look weightless by comparison.",
-        initialLikes = 412,
-        commentCount = 65
-    ),
-    MoviePost(
-        id = 104,
-        authorName = "Priya Verma",
-        timeAgo = "2d ago",
-        category = "Indie Gem",
-        title = "Past Lives is Quietly Devastating",
-        content = "A film about the paths not taken and the versions of ourselves we leave behind in different countries and phases of life. Greta Lee and Teo Yoo's chemistry is electric without ever raising their voices.",
-        initialLikes = 320,
-        commentCount = 51
-    )
-)

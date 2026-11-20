@@ -39,4 +39,13 @@ class MovieRepo {
 
     }
 
+    suspend fun getMovieDetails(
+        movieId: String
+    ): Response<PopularMovie> {
+        return api.getMovieDetails(
+            movieId = movieId
+        )
+
+    }
+
 }

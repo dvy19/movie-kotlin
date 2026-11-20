@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.movie.auth.SessionManager
 import com.example.movie.community.AddPostState
 import com.example.movie.community.CommRepo
 import com.example.movie.community.CommVMFac
@@ -57,14 +58,15 @@ fun AddPostScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isSubmitting by remember { mutableStateOf(false) }
 
+    val context= LocalContext.current
+
 
     val viewModel: CommViewModel = viewModel(
         factory = CommVMFac(
-            repository = CommRepo()
+            repository = CommRepo(SessionManager(context))
         )
     )
 
-    val context= LocalContext.current
 
     val addPostState by viewModel.addPostState.collectAsState()
 

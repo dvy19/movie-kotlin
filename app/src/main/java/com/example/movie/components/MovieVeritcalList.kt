@@ -18,11 +18,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.movie.movie.PopularMovie
 
 @Composable
 fun MovieVerticalList(
+    mainNavController: NavController,
     movies: List<PopularMovie>,
     modifier: Modifier = Modifier
 ) {
@@ -31,14 +33,19 @@ fun MovieVerticalList(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         for (movie in movies) {
-            MovieCard(movie = movie)
+            MovieCard(
+                onCardClick = {mainNavController.navigate("movie_detail/${movie.id}")},
+                movie = movie)
         }
     }
 }
 
 @Composable
-fun MovieCard(movie: PopularMovie) {
+fun MovieCard(
+    onCardClick : () -> Unit = {},
+    movie: PopularMovie) {
     Card(
+        onClick = onCardClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E24)),

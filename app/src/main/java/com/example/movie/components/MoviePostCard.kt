@@ -18,29 +18,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.movie.community.Post
 
-// 1. Data model for the Movie Post
-data class MoviePost(
-    val id: Int,
-    val authorName: String,
-    val timeAgo: String,
-    val category: String,
-    val title: String,
-    val content: String,
-    val initialLikes: Int,
-    val commentCount: Int,
-    val isInitiallyLiked: Boolean = false
-)
 
 @Composable
 fun MoviePostCard(
-    post: MoviePost = sampleMoviePost,
-    onCommentClick: (MoviePost) -> Unit = {},
-    onLikeToggle: (MoviePost, Boolean) -> Unit = { _, _ -> }
+    post: Post,
+
 ) {
     // Local state to make the like button immediately interactive
-    var isLiked by remember { mutableStateOf(post.isInitiallyLiked) }
-    var likeCount by remember { mutableIntStateOf(post.initialLikes) }
+    var isLiked by remember { mutableStateOf(false) }
+    var likeCount by remember { mutableIntStateOf(9) }
 
     ElevatedCard(
         modifier = Modifier
@@ -77,7 +65,7 @@ fun MoviePostCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "${post.authorName} profile",
+                            contentDescription = "${post.title} profile",
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -86,13 +74,13 @@ fun MoviePostCard(
 
                     Column {
                         Text(
-                            text = post.authorName,
+                            text = post.user.email,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = post.timeAgo,
+                            text = "time",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -182,7 +170,7 @@ fun MoviePostCard(
                     onClick = {
                         isLiked = !isLiked
                         likeCount += if (isLiked) 1 else -1
-                        onLikeToggle(post, isLiked)
+                        {  }
                     },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                 ) {
@@ -194,7 +182,7 @@ fun MoviePostCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "$likeCount",
+                        text = "${post.likes_count}",
                         style = MaterialTheme.typography.labelLarge,
                         color = if (isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -202,7 +190,7 @@ fun MoviePostCard(
 
                 // Comment Button
                 TextButton(
-                    onClick = { onCommentClick(post) },
+                    onClick = { {} },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Icon(
@@ -213,7 +201,7 @@ fun MoviePostCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "${post.commentCount}",
+                        text = "${post.comments_count}",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -222,15 +210,3 @@ fun MoviePostCard(
         }
     }
 }
-
-// 2. Sample Mock Data
-val sampleMoviePost = MoviePost(
-    id = 101,
-    authorName = "Vikramaditya Nair",
-    timeAgo = "2h ago",
-    category = "Sci-Fi Review",
-    title = "Dune: Part Two — A Masterclass in Sound & Scale",
-    content = "Denis Villeneuve delivers one of the most immersive theatrical experiences of the decade. The sandworm sequence alone justifies watching it on the largest screen possible, backed by Hans Zimmer's thunderous score.",
-    initialLikes = 248,
-    commentCount = 42
-)
