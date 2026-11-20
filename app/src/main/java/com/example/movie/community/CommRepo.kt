@@ -54,5 +54,12 @@ class CommRepo(
         )
     }
 
+    suspend fun getAllSurveys(): Response<AllSurveyResponse>{
+        return api.getAllSurveys(
+            token="Bearer $token"
+        )
+    }
+
+
 
 }

@@ -75,3 +75,181 @@ data class Post(
     var comments_count:Int,
     var user: PostUser
 )
+
+
+
+/* Survey creation response
+{
+    "data": {
+        "id": 1,
+        "title": "Inception Rewatch Poll",
+        "movie": "Inception",
+        "rating": 9,
+        "movie_image": null,
+        "description": "Vote on your favorite elements, scenes, and ending interpretations for Inception.",
+        "start_date": "2026-11-21T00:00:00Z",
+        "end_date": "2026-11-28T23:59:59Z",
+        "status": "published",
+        "created_by": 3,
+        "created_at": "2026-11-20",
+        "survey_questions": [
+            {
+                "id": 1,
+                "question_text": "Which dream level was your favorite?",
+                "choice_1": "Level 1: The Rainy City",
+                "choice_2": "Level 2: The Hotel Hallway",
+                "choice_3": "Level 3: The Snow Fortress",
+                "choice_4": "Level 4: Limbo",
+                "order": 1
+            },
+            {
+                "id": 2,
+                "question_text": "Which score/track stands out the most?",
+                "choice_1": "Time",
+                "choice_2": "Dream Is Collapsing",
+                "choice_3": "Mombasa",
+                "choice_4": "528491",
+                "order": 2
+            },
+            {
+                "id": 3,
+                "question_text": "What do you think happened at the very end?",
+                "choice_1": "Cobb woke up in reality",
+                "choice_2": "Cobb is still in a dream",
+                "choice_3": "The totem doesn't matter—he sees his kids",
+                "choice_4": "It's Mal's dream",
+                "order": 3
+            },
+            {
+                "id": 4,
+                "question_text": "Which character had the strongest arc?",
+                "choice_1": "Dom Cobb",
+                "choice_2": "Arthur",
+                "choice_3": "Ariadne",
+                "choice_4": "Eames",
+                "order": 4
+            }
+        ]
+    }
+}
+ */
+
+/* Single Survey Response
+
+{
+  "data": {
+    "id": 1,
+    "title": "Inception Rewatch Poll",
+    "movie": "Inception",
+    "rating": 9,
+    "movie_image": null,
+    "description": "Vote on your favorite elements, scenes, and ending interpretations for Inception.",
+    "start_date": "2026-11-21T00:00:00Z",
+    "end_date": "2026-11-28T23:59:59Z",
+    "status": "published",
+    "created_by": 1,
+    "created_at": "2026-11-20",
+    "survey_questions": [
+      {
+        "id": 1,
+        "question_text": "Which dream level was your favorite?",
+        "choice_1": "Level 1: The Rainy City",
+        "choice_2": "Level 2: The Hotel Hallway",
+        "choice_3": "Level 3: The Snow Fortress",
+        "choice_4": "Level 4: Limbo",
+        "order": 1
+      },
+      {
+        "id": 2,
+        "question_text": "Which score/track stands out the most?",
+        "choice_1": "Time",
+        "choice_2": "Dream Is Collapsing",
+        "choice_3": "Mombasa",
+        "choice_4": "528491",
+        "order": 2
+      },
+      {
+        "id": 3,
+        "question_text": "What do you think happened at the very end?",
+        "choice_1": "Cobb woke up in reality",
+        "choice_2": "Cobb is still in a dream",
+        "choice_3": "The totem doesn't matter—he sees his kids",
+        "choice_4": "It's Mal's dream",
+        "order": 3
+      },
+      {
+        "id": 4,
+        "question_text": "Which character had the strongest arc?",
+        "choice_1": "Dom Cobb",
+        "choice_2": "Arthur",
+        "choice_3": "Ariadne",
+        "choice_4": "Eames",
+        "order": 4
+      }
+    ]
+  }
+}
+ */
+
+/* All Survey Response
+
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Inception Rewatch Poll",
+      "movie": "Inception",
+      "rating": 9,
+      "movie_image": null,
+      "description": "Vote on your favorite elements, scenes, and ending interpretations for Inception.",
+      "start_date": "2026-11-21T00:00:00Z",
+      "end_date": "2026-11-28T23:59:59Z",
+      "status": "published",
+      "created_by": 1,
+      "created_at": "2026-11-20",
+      "survey_questions": [
+        {
+          "id": 1,
+          "question_text": "Which dream level was your favorite?",
+          "choice_1": "Level 1: The Rainy City",
+          "choice_2": "Level 2: The Hotel Hallway",
+          "choice_3": "Level 3: The Snow Fortress",
+          "choice_4": "Level 4: Limbo",
+          "order": 1
+        }
+      ]
+    }
+  ]
+}
+ */
+
+data class AllSurveyResponse(
+    val data:List<Survey>
+)
+
+data class Survey(
+
+    var id:Int,
+    var title:String,
+    var movie:String,
+    var rating:Int,
+    var movie_image:String?,
+    var description:String,
+    var start_date:String,
+    var end_date:String,
+    var status:String,
+    var created_by:Int,
+    var created_at:String,
+    var survey_questions:List<SurveyQuestion>
+
+)
+
+data class SurveyQuestion(
+    var id:Int,
+    var question_text:String,
+    var choice_1:String,
+    var choice_2:String,
+    var choice_3:String,
+    var choice_4:String,
+    var order:Int
+)

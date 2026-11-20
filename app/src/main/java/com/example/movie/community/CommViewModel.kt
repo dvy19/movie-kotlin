@@ -31,6 +31,12 @@ sealed class GetMyPostsState{
     data class Error(val message: String) : GetMyPostsState()
 }
 
+sealed class GetAllSurveysState {
+    object Idle : GetAllSurveysState()
+    object Loading : GetAllSurveysState()
+    data class Success(val data: AllSurveyResponse) : GetAllSurveysState()
+    data class Error(val message: String) : GetAllSurveysState()
+}
 class CommViewModel(
     private val repo: CommRepo
 ) : ViewModel() {
@@ -44,6 +50,10 @@ class CommViewModel(
 
     private val _getMyPostsState = MutableStateFlow<GetMyPostsState>(GetMyPostsState.Idle)
     val getMyPostsState = _getMyPostsState.asStateFlow()
+
+
+    private val _getAllSurveysState = MutableStateFlow<GetAllSurveysState>(GetAllSurveysState.Idle)
+    val getAllSurveysState = _getAllSurveysState.asStateFlow()
 
 
 
@@ -161,6 +171,31 @@ class CommViewModel(
         }
 
         }
+
+    fun get_all_surveys(){
+
+        _getAllSurveysState.value = GetAllSurveysState.Loading
+
+        viewModelScope.launch {
+
+            try {
+                val response = repo.getAllSurveys()
+
+                if(response.isSuccessful && response.body()!=null) {
+                    _getAllSurveysState.value= GetAllSurveysState.Success(response.body()!!)
+                }
+
+                else{
+                    _getAllSurveysState.value = GetAllSurveysState.Error(response.message())
+                }
+
+            }
+            catch (e: Exception) {
+                _getAllSurveysState.value = GetAllSurveysState.Error(e.message ?: "Unknown error")
+            }
+        }
+
+    }
 
 
 

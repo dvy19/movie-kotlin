@@ -35,3 +35,24 @@ data class LoginReq(
     val email:String,
     var password:String
 )
+
+
+data class UserProfileReq(
+    var name:String,
+    var gender:String,
+    var profile:String?,
+    var city:String
+)
+
+data class USerProfileRes(
+    var message:String,
+    var data:User
+)
+
+data class User(
+    var name:String,
+    var gender:String,
+    var profile:String?,
+    var city:String,
+    var mail:String
+)

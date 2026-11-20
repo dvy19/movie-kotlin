@@ -1,5 +1,6 @@
 package com.example.movie
 
+import UserDetailScreen
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +33,11 @@ fun RootNav(innerPadding: PaddingValues) {
 
         composable(Screens.Login.route){
             Login(rootNavController)
+        }
+
+
+        composable(Screens.UserDetailScreen.route){
+            UserDetailScreen(rootNavController)
         }
 
     }

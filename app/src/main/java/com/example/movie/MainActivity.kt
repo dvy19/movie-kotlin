@@ -32,6 +32,8 @@ sealed class Screens(val route: String){
     object Login: Screens("login")
     object HomeScreen: Screens("home")
 
+    data object UserDetailScreen: Screens("user_detail")
+
     data object MovieGridScreen:Screens("movie_grid_screen")
 
     data object MovieDetailScreen:Screens("movie_detail/{movie_id}")

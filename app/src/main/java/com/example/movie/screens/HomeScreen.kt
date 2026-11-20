@@ -53,8 +53,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movie.Screens
+import com.example.movie.auth.SessionManager
+import com.example.movie.community.CommRepo
+import com.example.movie.community.CommVMFac
+import com.example.movie.community.CommViewModel
+import com.example.movie.community.GetAllSurveysState
 import com.example.movie.components.GenreHorizontalList
 import com.example.movie.components.MovieVerticalList
+import com.example.movie.components.RecentSurveyCard
 import com.example.movie.movie.GetGenreState
 import com.example.movie.movie.GetPopularMoviesState
 import com.example.movie.movie.Movie
@@ -71,59 +77,6 @@ import kotlinx.coroutines.launch
 
 
 
-val sampleMovies = listOf(
-    PopularMovie(
-        adult = false,
-        backdropPath = "/9FE5eD92WfVCiivM9Pq9GVSrlWk.jpg",
-        genreIds = listOf(28, 53, 80),
-        id = 155,
-        title = "The Dark Knight",
-        originalLanguage = "en",
-        originalTitle = "The Dark Knight",
-        overview = "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets.",
-        popularity = 4135.68,
-        posterPath = "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-        releaseDate = "2008-07-16",
-        softcore = false,
-        video = false,
-        voteAverage = 8.5,
-        voteCount = 37141
-    ),
-    PopularMovie(
-        adult = false,
-        backdropPath = "/sl5NJ1vtyhP9Vr88bB4blULsJYp.jpg",
-        genreIds = listOf(16, 12, 14),
-        id = 791523,
-        title = "Wildwood",
-        originalLanguage = "en",
-        originalTitle = "Wildwood",
-        overview = "Prue McKeel and her best friend Curtis are drawn into a hidden, magical forest on the outskirts of Portland after her infant brother Mac is abducted by a murder of crows.",
-        popularity = 1250.45,
-        posterPath = "/jN1B3J4lWk9vVqY.jpg",
-        releaseDate = "2025-10-08",
-        softcore = false,
-        video = false,
-        voteAverage = 7.9,
-        voteCount = 1420
-    ),
-    PopularMovie(
-        adult = true,
-        backdropPath = "/zO1p3v9qX67A2aM7N5u99.jpg",
-        genreIds = listOf(18, 53),
-        id = 49013,
-        title = "Nymphomaniac: Vol. I",
-        originalLanguage = "en",
-        originalTitle = "Nymphomaniac: Vol. I",
-        overview = "A self-diagnosed nymphomaniac recounts her erotic experiences to the man who saved her after a beating.",
-        popularity = 890.12,
-        posterPath = "/8bF7y.jpg",
-        releaseDate = "2013-12-25",
-        softcore = false,
-        video = false,
-        voteAverage = 6.9,
-        voteCount = 3105
-    )
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,6 +105,18 @@ fun HomeScreen(
             )
         )
     )
+
+    val commViewModel: CommViewModel= viewModel(
+        factory = CommVMFac(
+            repository = CommRepo(
+                sessionManager = SessionManager(context)
+            )
+        )
+    )
+
+    val getAllSurveysState by commViewModel.getAllSurveysState.collectAsState()
+
+
 
     val genreState by cacheViewModel.getGenre.collectAsState()
 
@@ -386,6 +351,32 @@ fun HomeScreen(
                     .padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
+
+                when(val state=getAllSurveysState){
+                    is GetAllSurveysState.Loading -> {
+                        item{ CircularProgressIndicator() }
+                    }
+
+                    is GetAllSurveysState.Success -> {
+
+                        item{
+                            RecentSurveyCard(
+                                survey = state.data.data[0],
+                                onClick = {
+
+                                }
+                            )
+                        }
+
+                    }
+                    is GetAllSurveysState.Error -> {
+                       item { Text(text = state.message) }
+                    }
+                    else -> {
+
+                    }
+                }
 
                 item {
                     Text("Categories", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)

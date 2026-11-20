@@ -1,6 +1,7 @@
 package com.example.movie.auth
 
 import com.example.movie.ApiClient
+import okhttp3.MultipartBody
 import retrofit2.Response
 
 class AuthRepo(
@@ -18,6 +19,23 @@ class AuthRepo(
 
         return api.login(request)
 
-
     }
+
+    suspend fun createUser(
+        name:String,
+        gender:String,
+        city:String,
+        profile: MultipartBody.Part?
+    ):Response<USerProfileRes>{
+        val token="Bearer ${sessionManager.getAccessToken()}"
+        return api.createUser(
+            token="Bearer $token",
+            name=name,
+            gender=gender,
+            city=city,
+            profile=profile
+        )
+    }
+
+
 }

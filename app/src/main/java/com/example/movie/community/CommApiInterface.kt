@@ -39,6 +39,12 @@ interface CommApiInterface {
         @Query("category") category: String?=null
     ) : Response<List<Post>>
 
+    @GET("accounts/surveys/create/")
+    suspend fun getAllSurveys(
+        @Header("Authorization") token: String,
+    ) : Response<AllSurveyResponse>
+
+
 
 
 

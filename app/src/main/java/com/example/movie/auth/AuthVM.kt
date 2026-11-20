@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 
 
 sealed class RegisterState{
@@ -15,10 +16,22 @@ sealed class RegisterState{
     data class Success(val data: RegisterResponse) : RegisterState()
     data class Error(val message: String) : RegisterState()
 }
+
+sealed class CreateUserState{
+    object Idle : CreateUserState()
+    object Loading : CreateUserState()
+    data class Success(val data: USerProfileRes) : CreateUserState()
+    data class Error(val message: String) : CreateUserState()
+}
+
 class AuthVM(application: Application): AndroidViewModel(application){
 
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
     val registerState = _registerState.asStateFlow()
+
+    private val _createUserState = MutableStateFlow<CreateUserState>(CreateUserState.Idle)
+    val createUserState = _createUserState.asStateFlow()
+
 
     val sessionManager= SessionManager(application)
 
@@ -79,6 +92,38 @@ class AuthVM(application: Application): AndroidViewModel(application){
 
             }
         }
+    }
+
+    fun createUserProfile(
+        name:String,
+        gender:String,
+        city:String,
+        profile: MultipartBody.Part?
+    ){
+        _createUserState.value = CreateUserState.Loading
+
+        viewModelScope.launch {
+            try {
+                val response = repo.createUser(
+                    name=name,
+                    gender=gender,
+                    city=city,
+                    profile=profile
+                )
+
+                if(response.isSuccessful && response.body()!=null) {
+                    _createUserState.value = CreateUserState.Success(response.body()!!)
+                }
+                else{
+                    _createUserState.value = CreateUserState.Error(response.message())
+
+                    }
+            }
+            catch (e: Exception) {
+                _createUserState.value = CreateUserState.Error(e.message ?: "Unknown error")
+                }
+        }
+
     }
 
 
