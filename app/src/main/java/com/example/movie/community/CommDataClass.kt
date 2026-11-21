@@ -1,5 +1,7 @@
 package com.example.movie.community
 
+import com.google.gson.annotations.SerializedName
+
 
 data class PostRequest(
     var title:String,
@@ -252,4 +254,15 @@ data class SurveyQuestion(
     var choice_3:String,
     var choice_4:String,
     var order:Int
+)
+
+data class UserSurveyResponse(
+    @SerializedName("question")
+    val question: Int,
+
+    @SerializedName("selected_choice")
+    val selectedChoice: String?, // nullable in case not attended
+
+    @SerializedName("has_attended")
+    val hasAttended: Boolean
 )

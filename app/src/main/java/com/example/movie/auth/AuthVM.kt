@@ -1,6 +1,7 @@
 package com.example.movie.auth
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -113,13 +114,31 @@ class AuthVM(application: Application): AndroidViewModel(application){
 
                 if(response.isSuccessful && response.body()!=null) {
                     _createUserState.value = CreateUserState.Success(response.body()!!)
+
+                    Log.d("m","success")
+
+                    Log.d("m",response.body().toString())
+
+
+
+
+
+
                 }
                 else{
+
+                    Log.d("m","error")
+
                     _createUserState.value = CreateUserState.Error(response.message())
 
                     }
+
             }
             catch (e: Exception) {
+                Log.d("m",e.message.toString())
+                Log.d("m",e.toString())
+                Log.d("m",e.stackTraceToString())
+
                 _createUserState.value = CreateUserState.Error(e.message ?: "Unknown error")
                 }
         }

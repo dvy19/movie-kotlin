@@ -37,6 +37,16 @@ sealed class GetAllSurveysState {
     data class Success(val data: AllSurveyResponse) : GetAllSurveysState()
     data class Error(val message: String) : GetAllSurveysState()
 }
+
+
+sealed class UserSurveyResponseState{
+    object Idle : UserSurveyResponseState()
+    object Loading : UserSurveyResponseState()
+    data class Success(val data: List<UserSurveyResponse>) : UserSurveyResponseState()
+    data class Error(val message: String) : UserSurveyResponseState()
+}
+
+
 class CommViewModel(
     private val repo: CommRepo
 ) : ViewModel() {
@@ -54,6 +64,10 @@ class CommViewModel(
 
     private val _getAllSurveysState = MutableStateFlow<GetAllSurveysState>(GetAllSurveysState.Idle)
     val getAllSurveysState = _getAllSurveysState.asStateFlow()
+
+    private val _userSurveyResponseState = MutableStateFlow<UserSurveyResponseState>(UserSurveyResponseState.Idle)
+    val userSurveyResponseState = _userSurveyResponseState.asStateFlow()
+
 
 
 
@@ -180,6 +194,11 @@ class CommViewModel(
 
             try {
                 val response = repo.getAllSurveys()
+                Log.d("response",response.toString())
+                Log.d("response",response.body().toString())
+                Log.d("response",response.isSuccessful.toString())
+                Log.d("response",response.code().toString())
+
 
                 if(response.isSuccessful && response.body()!=null) {
                     _getAllSurveysState.value= GetAllSurveysState.Success(response.body()!!)
@@ -193,6 +212,31 @@ class CommViewModel(
             catch (e: Exception) {
                 _getAllSurveysState.value = GetAllSurveysState.Error(e.message ?: "Unknown error")
             }
+        }
+
+    }
+
+    fun user_survey_response(request: List<UserSurveyResponse>){
+        _userSurveyResponseState.value = UserSurveyResponseState.Loading
+
+        viewModelScope.launch {
+            try {
+                val response = repo.userSurveyResponse(request)
+
+                if(response.isSuccessful && response.body()!=null) {
+                    _userSurveyResponseState.value= UserSurveyResponseState.Success(response.body()!!)
+                    Log.d("response",response.body().toString())
+                }
+
+                else{
+                    _userSurveyResponseState.value = UserSurveyResponseState.Error(response.message())
+                }
+
+                }
+            catch (e: Exception) {
+                _userSurveyResponseState.value = UserSurveyResponseState.Error(e.message ?: "Unknown error")
+            }
+
         }
 
     }

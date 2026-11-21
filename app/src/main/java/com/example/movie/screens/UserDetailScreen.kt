@@ -1,6 +1,7 @@
 
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -100,7 +101,7 @@ fun UserDetailScreen(
 
 
     val isFormValid = name.isNotBlank() &&
-            profileFile != null &&
+
             selectedGender.isNotBlank() &&
             selectedCity.isNotBlank()
 
@@ -273,20 +274,17 @@ fun UserDetailScreen(
 
                         }
 
+                    Log.d("m","clicked button")
+
                     viewModel.createUserProfile(
-
-
                             name=name,
                             gender=selectedGender,
                             city=selectedCity,
                             profile=imagePart,
-
-
-
                     )
 
                 },
-                enabled = isFormValid,
+                //enabled = isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)

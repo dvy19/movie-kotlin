@@ -44,6 +44,12 @@ interface CommApiInterface {
         @Header("Authorization") token: String,
     ) : Response<AllSurveyResponse>
 
+    @POST("accounts/surveys/submit-survey-response/")
+    suspend fun userSurveyRes(
+        @Header("Authorization") token: String,
+        @Body body: List<UserSurveyResponse>
+    ): Response<List<UserSurveyResponse>>
+
 
 
 

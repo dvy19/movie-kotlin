@@ -114,6 +114,8 @@ fun HomeScreen(
         )
     )
 
+
+
     val getAllSurveysState by commViewModel.getAllSurveysState.collectAsState()
 
 
@@ -122,8 +124,15 @@ fun HomeScreen(
 
 
     LaunchedEffect(Unit) {
-        cacheViewModel.get_genre()
+
+
+        commViewModel.get_all_surveys()
+        viewModel.get_genres()
+        viewModel.get_popular_movies()
+
     }
+
+
 
     when(val state=genreState){
         is GetCacheGenreState.Loading -> {
@@ -147,12 +156,7 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
 
-
-
-        viewModel.get_popular_movies()
-    }
 
 
 
@@ -364,6 +368,7 @@ fun HomeScreen(
                             RecentSurveyCard(
                                 survey = state.data.data[0],
                                 onClick = {
+                                    mainNavController.navigate(Screens.SurveyDetailScreen.route)
 
                                 }
                             )

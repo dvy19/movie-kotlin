@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MovieTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainScreen(innerPadding)
+                    RootNav(innerPadding)
                 }
             }
         }
@@ -31,6 +31,8 @@ sealed class Screens(val route: String){
     object Register: Screens("register")
     object Login: Screens("login")
     object HomeScreen: Screens("home")
+
+    object MainScreen:Screens("main")
 
     data object UserDetailScreen: Screens("user_detail")
 
@@ -47,6 +49,8 @@ sealed class Screens(val route: String){
     data object MovieFeedScreen:Screens("movie_feed")
 
     data object ProfileScreen:Screens("profile")
+
+    data object SurveyDetailScreen:Screens("survey_details")
 
 
 

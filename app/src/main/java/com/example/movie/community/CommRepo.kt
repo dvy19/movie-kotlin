@@ -60,6 +60,14 @@ class CommRepo(
         )
     }
 
+    suspend fun userSurveyResponse(request: List<UserSurveyResponse>): Response<List<UserSurveyResponse>>{
+        return api.userSurveyRes(
+            token="Bearer $token",
+            body=request
+        )
+
+    }
+
 
 
 }

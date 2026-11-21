@@ -40,6 +40,12 @@ fun RootNav(innerPadding: PaddingValues) {
             UserDetailScreen(rootNavController)
         }
 
+        composable(Screens.MainScreen.route){
+            MainScreen(rootNavController
+            ,innerPadding)
+
+        }
+
     }
 
 }

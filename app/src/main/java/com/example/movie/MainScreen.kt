@@ -22,11 +22,13 @@ import com.example.movie.screens.MovieDetailScreen
 import com.example.movie.screens.MovieFeedScreen
 import com.example.movie.screens.MovieGridScreen
 import com.example.movie.screens.ProfileScreen
+import com.example.movie.screens.SurveyDetailScreen
 import com.example.movie.screens.sampleUser
 import com.example.movie.screens.sampleUsers
 
 @Composable
 fun MainScreen(
+    rootNavController: NavController,
     innerPadding: PaddingValues
 ) {
     val mainNavController = rememberNavController()
@@ -56,6 +58,12 @@ fun MainScreen(
                     mainNavController,
                     modifier = Modifier,
 
+                )
+            }
+
+            composable(Screens.SurveyDetailScreen.route){
+                SurveyDetailScreen(
+                    mainNavController
                 )
             }
 
