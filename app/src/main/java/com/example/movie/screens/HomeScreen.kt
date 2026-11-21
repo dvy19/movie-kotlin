@@ -106,6 +106,8 @@ fun HomeScreen(
         )
     )
 
+    val sessionManager=SessionManager(context)
+
     val commViewModel: CommViewModel= viewModel(
         factory = CommVMFac(
             repository = CommRepo(
@@ -203,7 +205,7 @@ fun HomeScreen(
                 NavigationDrawerItem(
                     label = {
                         Text(
-                            "Your Plants",
+                            "My Surveys",
                             color = Color.Black
                         )
                     },
@@ -265,9 +267,9 @@ fun HomeScreen(
                     ),
 
                     onClick = {
-                        //sessionManager.logout()
+                        sessionManager.logout()
 
-                        //mainNavController.navigate(Screens.GetStartScreen.route)
+                        mainNavController.navigate(Screens.Login.route)
 
                         Toast.makeText(context, "Logged Out", Toast.LENGTH_SHORT).show()
                     },

@@ -15,11 +15,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.movie.Screens.MovieDetailScreen
+import com.example.movie.auth.Login
 import com.example.movie.screens.AddPostScreen
 import com.example.movie.screens.AllUsersScreen
 import com.example.movie.screens.HomeScreen
 import com.example.movie.screens.MovieDetailScreen
 import com.example.movie.screens.MovieFeedScreen
+import com.example.movie.screens.MovieFilterState
 import com.example.movie.screens.MovieGridScreen
 import com.example.movie.screens.ProfileScreen
 import com.example.movie.screens.SurveyDetailScreen
@@ -28,7 +30,7 @@ import com.example.movie.screens.sampleUsers
 
 @Composable
 fun MainScreen(
-    rootNavController: NavController,
+    //rootNavController: NavController,
     innerPadding: PaddingValues
 ) {
     val mainNavController = rememberNavController()
@@ -57,8 +59,15 @@ fun MainScreen(
                 MovieGridScreen(
                     mainNavController,
                     modifier = Modifier,
+                    currentFilter = MovieFilterState(),
+                    onApplyFilters = { },
+                    onResetFilters = { }
 
                 )
+            }
+
+            composable(Screens.Login.route){
+
             }
 
             composable(Screens.SurveyDetailScreen.route){

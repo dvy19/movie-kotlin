@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.example.movie.ui.theme.MovieTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +21,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             MovieTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    RootNav(innerPadding)
+                    //RootNav(innerPadding)
+                    MainScreen(
+
+                        innerPadding
+                    )
                 }
             }
         }
@@ -28,6 +33,8 @@ class MainActivity : ComponentActivity() {
 }
 
 sealed class Screens(val route: String){
+
+    data object Splash: Screens("splash")
     object Register: Screens("register")
     object Login: Screens("login")
     object HomeScreen: Screens("home")

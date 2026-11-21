@@ -159,16 +159,17 @@ fun  ProfileScreen(
                                 )
                             }
                         }
+                    }
 
-                        items(
-                            items = posts,
-                            key = { post -> post.id }
-                        ) { post ->
-                            MoviePostCard(
-                                post = post,
-                                //mainNavController = mainNavController
-                            )
-                        }
+                    items(
+                        items = posts,
+                        key = { post -> post.id }
+                    ) { post ->
+                        MoviePostCard(
+                            post = post,
+                            //mainNavController = mainNavController
+                        )
+
 
 
                     }

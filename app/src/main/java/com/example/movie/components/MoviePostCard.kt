@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.movie.community.Post
 
 
@@ -135,11 +136,10 @@ fun MoviePostCard(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Movie,
+                    AsyncImage(
+                        model = post.image,
                         contentDescription = "Movie Poster",
-                        modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.size(120.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(

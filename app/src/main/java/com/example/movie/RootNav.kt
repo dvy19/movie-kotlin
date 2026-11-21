@@ -10,6 +10,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.movie.auth.Login
 import com.example.movie.auth.Register
+import com.example.movie.auth.SplashScreen
 
 @Composable
 fun RootNav(innerPadding: PaddingValues) {
@@ -19,9 +20,14 @@ fun RootNav(innerPadding: PaddingValues) {
 
     NavHost(
         navController = rootNavController,
-        startDestination = Screens.Register.route
+        startDestination = Screens.Login.route
 
     ) {
+
+        composable(Screens.Splash.route){
+            SplashScreen(rootNavController)
+        }
+
 
         composable(Screens.Register.route){
             Register(
@@ -32,7 +38,11 @@ fun RootNav(innerPadding: PaddingValues) {
         }
 
         composable(Screens.Login.route){
-            Login(rootNavController)
+            Login(
+                rootNavController
+            , onSignupClicked = { rootNavController.navigate(Screens.Register.route) }
+
+            )
         }
 
 
@@ -41,8 +51,7 @@ fun RootNav(innerPadding: PaddingValues) {
         }
 
         composable(Screens.MainScreen.route){
-            MainScreen(rootNavController
-            ,innerPadding)
+            MainScreen(innerPadding)
 
         }
 

@@ -1,6 +1,7 @@
 package com.example.movie.movie
 
 import com.example.movie.ApiClient
+import org.intellij.lang.annotations.Language
 import retrofit2.Response
 
 class MovieRepo {
@@ -56,6 +57,30 @@ class MovieRepo {
             query = query,
             page = page
         )
+    }
+
+    suspend fun getFilterMovies(
+        page:Int,
+        language: String,
+        sortBy: String = "popularity.desc",
+        originalLanguage: String? = null,
+        includeAdult: Boolean = false,
+        releaseYear: Int? = null,
+        releaseDateGte: String? = null,
+        releaseDateLte: String? = null
+    ) : Response<PopularMovieResponse>{
+        return api.getFilterMovies(
+
+            page = page,
+            language = language,
+            sortBy = sortBy,
+            originalLanguage = originalLanguage,
+            includeAdult = includeAdult,
+            releaseYear = releaseYear,
+            releaseDateGte = releaseDateGte,
+            releaseDateLte = releaseDateLte
+        )
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.movie.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -48,6 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.movie.movie.MovieVM
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -127,9 +129,23 @@ val sampleGridMovies = listOf(
     )
 )
 
+data class FilterOption(
+    val label: String,
+    val code: String?
+)
+
+data class MovieFilterState(
+    val language: FilterOption = FilterOption("All", null),
+    val releaseYear: FilterOption = FilterOption("All", null),
+    val includeAdult: Boolean = false
+)
+
 @Composable
 fun MovieGridScreen(
     mainNavController: NavController,
+    currentFilter: MovieFilterState,
+    onApplyFilters: (MovieFilterState) -> Unit,
+    onResetFilters: () -> Unit,
 
     modifier: Modifier = Modifier
 ) {
@@ -143,7 +159,9 @@ fun MovieGridScreen(
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
-        vm.get_popular_movies(page = 1)
+        vm.get_popular_movies(
+            page = 1,
+        )
     }
 
     val onQueryChange: (String) -> Unit = { newQuery ->
@@ -166,6 +184,28 @@ fun MovieGridScreen(
 
 
 
+    val languages = remember {
+        listOf(
+            FilterOption("All", null),
+            FilterOption("English", "en"),
+            FilterOption("Hindi", "hi"),
+            FilterOption("Korean", "ko")
+        )
+    }
+
+    val releaseYears = remember {
+        listOf(
+            FilterOption("All", null),
+            FilterOption("2026", "2026"),
+            FilterOption("2025", "2025"),
+            FilterOption("2024", "2024")
+        )
+    }
+
+    var selectedLanguage by remember(currentFilter) { mutableStateOf(currentFilter.language) }
+    var selectedYear by remember(currentFilter) { mutableStateOf(currentFilter.releaseYear) }
+    var includeAdult by remember(currentFilter) { mutableStateOf(currentFilter.includeAdult) }
+
 
 
     Scaffold(
@@ -176,80 +216,178 @@ fun MovieGridScreen(
                 color = Color(0xFF121212),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .statusBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = {
-                            Text("Search movies...", color = Color.Gray)
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search Icon",
-                                tint = Color(0xFFE50914)
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(
-                                    onClick = {
-                                        searchQuery = ""
-                                        // Optional: viewModel.loadDefaultMovies()
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = "Clear Search",
-                                        tint = Color.Gray
-                                    )
-                                }
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Search
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onSearch = { triggerSearch() }
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE50914),
-                            unfocusedBorderColor = Color(0xFF333333),
-                            focusedContainerColor = Color(0xFF1E1E1E),
-                            unfocusedContainerColor = Color(0xFF1E1E1E),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            cursorColor = Color(0xFFE50914)
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Button(
-                        onClick = triggerSearch,
-                        enabled = searchQuery.isNotBlank(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFE50914),
-                            contentColor = Color.White,
-                            disabledContainerColor = Color(0xFF2C2C2C),
-                            disabledContentColor = Color.Gray
-                        ),
-                        modifier = Modifier.height(56.dp) // Matches standard OutlinedTextField height
+                    // Search Bar + Button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("Search")
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = {
+                                Text("Search movies...", color = Color.Gray)
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search Icon",
+                                    tint = Color(0xFFE50914)
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            searchQuery = ""
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear Search",
+                                            tint = Color.Gray
+                                        )
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSearch = { triggerSearch() }
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFE50914),
+                                unfocusedBorderColor = Color(0xFF333333),
+                                focusedContainerColor = Color(0xFF1E1E1E),
+                                unfocusedContainerColor = Color(0xFF1E1E1E),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                cursorColor = Color(0xFFE50914)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Button(
+                            onClick = triggerSearch,
+                            enabled = searchQuery.isNotBlank(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFE50914),
+                                contentColor = Color.White,
+                                disabledContainerColor = Color(0xFF2C2C2C),
+                                disabledContentColor = Color.Gray
+                            ),
+                            modifier = Modifier.height(56.dp)
+                        ) {
+                            Text("Search")
+                        }
+                    }
+
+                    // Row 1: Language & Release Year Dropdowns
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterDropdown(
+                            label = "Language: ${selectedLanguage.label}",
+                            options = languages,
+                            onSelect = { selectedLanguage = it },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        FilterDropdown(
+                            label = "Year: ${selectedYear.label}",
+                            options = releaseYears,
+                            onSelect = { selectedYear = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    // Row 2: Adult Toggle + Reset & Apply Actions
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FilterChip(
+                            selected = includeAdult,
+                            onClick = { includeAdult = !includeAdult },
+                            label = { Text("Include Adult") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = Color(0xFF1E1E1E),
+                                labelColor = Color.LightGray,
+                                selectedContainerColor = Color(0xFFE50914).copy(alpha = 0.22f),
+                                selectedLabelColor = Color.White
+                            )
+                        )
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(
+                                onClick = {
+                                    val cleared = MovieFilterState()
+                                    selectedLanguage = cleared.language
+                                    selectedYear = cleared.releaseYear
+                                    includeAdult = cleared.includeAdult
+                                    onResetFilters()
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = Color.LightGray
+                                ),
+                                border = BorderStroke(1.dp, Color(0xFF444444))
+                            ) {
+                                Text("Reset")
+                            }
+
+                            Button(
+                                onClick = {
+                                    val newState = MovieFilterState(
+                                        language = selectedLanguage,
+                                        releaseYear = selectedYear,
+                                        includeAdult = includeAdult
+                                    )
+                                    onApplyFilters(newState)
+
+                                    vm.get_filter_movies(
+                                        page = 1,
+                                        language = "en-US",
+                                        sortBy = "popularity.desc",
+                                        originalLanguage = selectedLanguage.code,
+                                        includeAdult = includeAdult,
+                                        releaseYear = selectedYear.code?.toIntOrNull(),
+                                        releaseDateGte = null,
+                                        releaseDateLte = null
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFE50914),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text("Apply")
+                            }
+                        }
                     }
                 }
             }
         }
     ) { innerPadding ->
+        // Pass `innerPadding` (e.g. Modifier.padding(innerPadding)) to your content container
+
+
+
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2), // Forces exactly 2 columns
             modifier = Modifier
@@ -391,6 +529,50 @@ fun MovieGridCard(
                     color = Color(0xFFFFC107), // Gold/Amber accent
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterDropdown(
+    label: String,
+    options: List<FilterOption>,
+    onSelect: (FilterOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = label, maxLines = 1)
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null
+                )
+            }
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.label) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    }
                 )
             }
         }

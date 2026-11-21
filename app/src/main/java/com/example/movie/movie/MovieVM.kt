@@ -45,6 +45,8 @@ sealed class MovieDetailState{
 
 
 
+
+
 class MovieVM : ViewModel() {
 
     private val repo = MovieRepo()
@@ -60,6 +62,8 @@ class MovieVM : ViewModel() {
 
     private val _movieDetailState = MutableStateFlow<MovieDetailState>(MovieDetailState.Idle)
     val movieDetailState: StateFlow<MovieDetailState> = _movieDetailState.asStateFlow()
+
+
 
 
 
@@ -209,6 +213,49 @@ class MovieVM : ViewModel() {
             }
         }
             }
+
+    fun get_filter_movies(
+
+        page: Int = 1,
+        language: String = "en-US",
+        sortBy: String = "popularity.desc",
+        originalLanguage: String? = null,
+        includeAdult: Boolean = false,
+        releaseYear: Int? = null,
+        releaseDateGte: String? = null,
+        releaseDateLte: String? = null
+    ) {
+        _popularMoviesState.value = GetPopularMoviesState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repo.getFilterMovies(
+
+                    page = page,
+                    language = language,
+                    sortBy = sortBy,
+                    originalLanguage = originalLanguage?.takeIf { it.isNotBlank() },
+                    includeAdult = includeAdult,
+                    releaseYear = releaseYear,
+                    releaseDateGte = releaseDateGte?.takeIf { it.isNotBlank() },
+                    releaseDateLte = releaseDateLte?.takeIf { it.isNotBlank() }
+                )
+
+                Log.d("MovieVM genre", "Response body: ${response.body()}")
+                Log.d("MovieVM genre", "Response isSuccessful: ${response.isSuccessful}")
+                Log.d("MovieVM genre", "Response code: ${response.code()}")
+                Log.d("MovieVM genre", "Response message: ${response.message()}")
+
+                if (response.isSuccessful && response.body()!=null) {
+                    _popularMoviesState.value= GetPopularMoviesState.Success(response.body()!!)
+                } else {
+                    throw Exception("Failed to fetch data")
+                }
+
+                } catch (e: Exception) {
+                _popularMoviesState.value = GetPopularMoviesState.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
 
 }
 

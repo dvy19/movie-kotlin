@@ -33,5 +33,18 @@ interface MovieApiInterface{
         @Query("page") page: Int = 1
     ): Response<PopularMovieResponse>
 
+    @GET("movies/filter-movies/")
+    suspend fun getFilterMovies(
+
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US",
+        @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("with_original_language") originalLanguage: String? = null,
+        @Query("include_adult") includeAdult: Boolean = false,
+        @Query("primary_release_year") releaseYear: Int? = null,
+        @Query("primary_release_date.gte") releaseDateGte: String? = null,
+        @Query("primary_release_date.lte") releaseDateLte: String? = null
+    ) : Response<PopularMovieResponse>
+
 
 }
