@@ -25,48 +25,116 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.movie.auth.SessionManager
+import com.example.movie.community.CommRepo
+import com.example.movie.community.CommVMFac
+import com.example.movie.community.CommViewModel
+import com.example.movie.community.GetAllSurveysState
+import com.example.movie.community.Survey
+import com.example.movie.community.SurveyQuestion
+import com.example.movie.community.UserSurveyResponse
 import kotlinx.coroutines.launch
 
-// --- UI Models (Replace with your domain/DTO models later) ---
-data class SurveyUiModel(
-    val id: String,
-    val movieName: String,
-    val title: String,
-    val startDate: String,
-    val endDate: String,
-    val imageUrl: String,
-    val description: String,
-    val status: String, // e.g., "ACTIVE", "ENDED"
-    val questions: List<SurveyQuestionUiModel>
+
+data class SurveyAnswerPayload(
+    val question: Int,
+    val selected_choice: String?,
+    val has_attended: Boolean
 )
 
-data class SurveyQuestionUiModel(
-    val id: String,
-    val questionText: String,
-    val choices: List<String> // Expected size: 4
-)
+private fun buildSurveyPayload(
+    questions: List<SurveyQuestion>,
+    selectedAnswers: Map<Int, Int>
+): List<UserSurveyResponse> {
+    return questions.mapIndexed { qIndex, question ->
+        val choiceIndex = selectedAnswers[qIndex]
+        val choices = listOf(
+            question.choice_1,
+            question.choice_2,
+            question.choice_3,
+            question.choice_4
+        )
+        UserSurveyResponse(
+            question = question.id, // or qIndex + 1 if your API expects 1..4 index
+            selectedChoice = choiceIndex?.let { choices[it] }, // actual choice text, or null if skipped
+            hasAttended = choiceIndex != null
+        )
+    }
+}
 
+
+
+@Composable
+fun SurveyDetailScreen(
+    mainNavController: NavController
+){
+
+    val context = LocalContext.current
+    val commViewModel: CommViewModel= viewModel(
+        factory = CommVMFac(
+            repository = CommRepo(
+                sessionManager = SessionManager(context)
+            )
+        )
+    )
+
+    val getAllSurveysState by commViewModel.getAllSurveysState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        commViewModel.get_all_surveys()
+    }
+
+    when(val state=getAllSurveysState){
+        is GetAllSurveysState.Loading -> {
+            CircularProgressIndicator()
+        }
+        is GetAllSurveysState.Success -> {
+            SurveyDetailLayout(
+                survey = state.data.data[0]
+            )
+        }
+        is GetAllSurveysState.Error -> {
+            Text(text = state.message)
+        }
+        else -> {
+
+        }
+    }
+
+}
 // --- Parent Screen ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SurveyDetailScreen(
-    mainNavController: NavController,
-    survey: SurveyUiModel = sampleSurveyData(),
+fun SurveyDetailLayout(
+    survey: Survey,
     onBackClick: () -> Unit = {},
     onSubmitSurvey: (Map<Int, Int>) -> Unit = {}
 ) {
+
+
+    val context = LocalContext.current
+    val commViewModel: CommViewModel= viewModel(
+        factory = CommVMFac(
+            repository = CommRepo(
+                sessionManager = SessionManager(context)
+            )
+        )
+    )
+
     // Tracks selected choice index (0..3) per question index (0..3)
     val selectedAnswers = remember { mutableStateMapOf<Int, Int>() }
-    val pagerState = rememberPagerState(pageCount = { survey.questions.size })
+    val pagerState = rememberPagerState(pageCount = { survey.survey_questions.size })
     val coroutineScope = rememberCoroutineScope()
 
-    val isSurveyActive = survey.status.equals("ACTIVE", ignoreCase = true)
-    val allQuestionsAnswered = selectedAnswers.size == survey.questions.size
+    val isSurveyActive = survey.status.equals("published", ignoreCase = true)
+    val allQuestionsAnswered = selectedAnswers.size == survey.survey_questions.size
 
     Scaffold(
         topBar = {
@@ -120,7 +188,7 @@ fun SurveyDetailScreen(
                     }
 
                     // Next or Submit Button
-                    if (pagerState.currentPage < survey.questions.lastIndex) {
+                    if (pagerState.currentPage < survey.survey_questions.lastIndex) {
                         FilledTonalButton(
                             onClick = {
                                 coroutineScope.launch {
@@ -141,7 +209,15 @@ fun SurveyDetailScreen(
                         }
                     } else {
                         Button(
-                            onClick = { onSubmitSurvey(selectedAnswers.toMap()) },
+                            onClick = {
+
+                                    val payload = buildSurveyPayload(
+                                        selectedAnswers = selectedAnswers,
+                                        questions = survey.survey_questions
+                                    )
+                                    commViewModel.user_survey_response(payload)
+
+                                      },
                             enabled = isSurveyActive && allQuestionsAnswered,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
@@ -177,7 +253,7 @@ fun SurveyDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Question ${pagerState.currentPage + 1} of ${survey.questions.size}",
+                    text = "Question ${pagerState.currentPage + 1} of ${survey.survey_questions.size}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -185,7 +261,7 @@ fun SurveyDetailScreen(
 
                 // Step Dots
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    repeat(survey.questions.size) { index ->
+                    repeat(survey.survey_questions.size) { index ->
                         val isCurrent = pagerState.currentPage == index
                         val isAnswered = selectedAnswers.containsKey(index)
                         Box(
@@ -212,7 +288,7 @@ fun SurveyDetailScreen(
                 pageSpacing = 12.dp,
                 modifier = Modifier.fillMaxWidth()
             ) { pageIndex ->
-                val question = survey.questions[pageIndex]
+                val question = survey.survey_questions[pageIndex]
                 QuestionCard(
                     questionNumber = pageIndex + 1,
                     question = question,
@@ -228,7 +304,7 @@ fun SurveyDetailScreen(
 }
 
 @Composable
-private fun SurveyHeaderSection(survey: SurveyUiModel) {
+private fun SurveyHeaderSection(survey: Survey) {
     val isActive = survey.status.equals("ACTIVE", ignoreCase = true)
 
     Card(
@@ -248,8 +324,8 @@ private fun SurveyHeaderSection(survey: SurveyUiModel) {
                     .height(175.dp)
             ) {
                 AsyncImage(
-                    model = survey.imageUrl,
-                    contentDescription = survey.movieName,
+                    model = survey.movie_image,
+                    contentDescription = survey.movie,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -298,7 +374,7 @@ private fun SurveyHeaderSection(survey: SurveyUiModel) {
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = survey.movieName,
+                        text = survey.movie,
                         style = MaterialTheme.typography.labelLarge,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
@@ -330,7 +406,7 @@ private fun SurveyHeaderSection(survey: SurveyUiModel) {
                         modifier = Modifier.size(15.dp)
                     )
                     Text(
-                        text = "${survey.startDate} – ${survey.endDate}",
+                        text = "${survey.start_date} – ${survey.end_date}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -349,11 +425,13 @@ private fun SurveyHeaderSection(survey: SurveyUiModel) {
 @Composable
 private fun QuestionCard(
     questionNumber: Int,
-    question: SurveyQuestionUiModel,
+    question: SurveyQuestion,
     selectedChoiceIndex: Int?,
     enabled: Boolean,
     onChoiceSelected: (Int) -> Unit
 ) {
+
+    val choices=listOf(question.choice_1 , question.choice_2 , question.choice_3 , question.choice_4)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -367,12 +445,14 @@ private fun QuestionCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Q$questionNumber. ${question.questionText}",
+                text = "Q$questionNumber. ${question.question_text}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
-            question.choices.forEachIndexed { index, choiceText ->
+
+
+            choices.forEachIndexed { index, choiceText ->
                 val isSelected = selectedChoiceIndex == index
                 val borderColor = if (isSelected) {
                     MaterialTheme.colorScheme.primary
@@ -431,55 +511,62 @@ private fun QuestionCard(
 }
 
 // --- Sample Preview Data ---
-private fun sampleSurveyData() = SurveyUiModel(
-    id = "survey_101",
-    movieName = "Dune: Part Two",
+private fun sampleSurveyData() = Survey(
+    id = 101,
+    movie = "Dune: Part Two",
     title = "Audience Verdict & Cinematography Poll",
-    startDate = "Nov 18, 2026",
-    endDate = "Nov 25, 2026",
-    imageUrl = "https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
+    start_date = "Nov 18, 2026",
+    end_date = "Nov 25, 2026",
+    movie_image = "https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
     description = "Share your thoughts on Denis Villeneuve's visual storytelling, sound design, and character arcs with the community.",
     status = "ACTIVE",
-    questions = listOf(
-        SurveyQuestionUiModel(
-            id = "q1",
-            questionText = "Which element stood out the most in the film?",
-            choices = listOf(
-                "IMAX Cinematography & Visuals",
-                "Hans Zimmer's Background Score",
-                "Paul Atreides' Character Arc",
-                "Action Choreography & Scale"
-            )
+    survey_questions = listOf(
+        SurveyQuestion(
+            id = 1,
+            question_text = "Which element stood out the most in the film?",
+
+            choice_1 = "IMAX Cinematography & Visuals",
+            choice_2 = "Hans Zimmer's Background Score",
+            choice_3 = "Paul Atreides' Character Arc",
+            choice_4 = "Action Choreography & Scale",
+            order = 1
+
         ),
-        SurveyQuestionUiModel(
-            id = "q2",
-            questionText = "How would you rate the pacing across the 166-minute runtime?",
-            choices = listOf(
-                "Gripping from start to finish",
-                "Slow build-up, explosive second half",
-                "Slightly rushed in the final act",
-                "Felt too long overall"
-            )
+        SurveyQuestion(
+            id =2,
+            question_text = "How would you rate the pacing across the 166-minute runtime?",
+
+                choice_1 = "Gripping from start to finish",
+            choice_2 ="Slow build-up, explosive second half",
+            choice_3 ="Slightly rushed in the final act",
+            choice_4 = "Felt too long overall",
+            order=2
+
         ),
-        SurveyQuestionUiModel(
-            id = "q3",
-            questionText = "Which supporting performance impressed you most?",
-            choices = listOf(
-                "Rebecca Ferguson (Lady Jessica)",
-                "Austin Butler (Feyd-Rautha)",
-                "Javier Bardem (Stilgar)",
-                "Zendaya (Chani)"
-            )
+        SurveyQuestion(
+            id = 3,
+            question_text = "Which supporting performance impressed you most?",
+
+                choice_1 = "Rebecca Ferguson (Lady Jessica)",
+            choice_2 ="Austin Butler (Feyd-Rautha)",
+            choice_3 ="Javier Bardem (Stilgar)",
+            choice_4= "Zendaya (Chani)",
+            order = 3
+
         ),
-        SurveyQuestionUiModel(
-            id = "q4",
-            questionText = "Would you rewatch it in theaters before Part Three?",
-            choices = listOf(
-                "Definitely in IMAX again",
-                "Yes, standard screening",
-                "Will rewatch at home on streaming",
-                "Once was enough for me"
-            )
+        SurveyQuestion(
+            id =4,
+            question_text = "Would you rewatch it in theaters before Part Three?",
+
+               choice_1 =  "Definitely in IMAX again",
+                choice_2 = "Yes, standard screening",
+               choice_3 =  "Will rewatch at home on streaming",
+               choice_4 =  "Once was enough for me",
+                order=4
+
         )
-    )
+    ),
+    rating = TODO(),
+    created_by = TODO(),
+    created_at = TODO()
 )

@@ -221,7 +221,14 @@ class CommViewModel(
 
         viewModelScope.launch {
             try {
+
+                Log.d("response",request.toString())
                 val response = repo.userSurveyResponse(request)
+
+                Log.d("response",response.toString())
+                Log.d("response",response.body().toString())
+                Log.d("response",response.isSuccessful.toString())
+                Log.d("response",response.code().toString())
 
                 if(response.isSuccessful && response.body()!=null) {
                     _userSurveyResponseState.value= UserSurveyResponseState.Success(response.body()!!)
@@ -234,6 +241,10 @@ class CommViewModel(
 
                 }
             catch (e: Exception) {
+
+                Log.d("response",e.toString())
+                Log.d("response",e.message.toString())
+                Log.d("response",e.stackTraceToString())
                 _userSurveyResponseState.value = UserSurveyResponseState.Error(e.message ?: "Unknown error")
             }
 
