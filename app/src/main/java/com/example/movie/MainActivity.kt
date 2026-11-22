@@ -21,11 +21,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MovieTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    //RootNav(innerPadding)
-                    MainScreen(
+                    RootNav(innerPadding)
 
-                        innerPadding
-                    )
                 }
             }
         }

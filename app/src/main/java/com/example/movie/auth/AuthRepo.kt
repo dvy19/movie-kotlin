@@ -5,6 +5,9 @@ import com.example.movie.ApiClient
 import okhttp3.MultipartBody
 import retrofit2.Response
 
+
+
+
 class AuthRepo(
     private val sessionManager: SessionManager
 ){
@@ -37,6 +40,15 @@ class AuthRepo(
             city=city,
             profile=profile
         )
+    }
+
+    suspend fun getAllUsers():Response<List<User>>{
+        val token="Bearer ${sessionManager.getAccessToken()}"
+        Log.d("m",token)
+        return api.getAllUsers(
+            token=token
+        )
+
     }
 
 

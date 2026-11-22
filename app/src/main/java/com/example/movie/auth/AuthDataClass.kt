@@ -56,3 +56,27 @@ data class User(
     var city:String,
     var mail:String
 )
+
+
+
+/* all user details
+
+[
+    {
+        "city": "delhi",
+        "gender": "male",
+        "user": 25,
+        "profile": null,
+        "name": "divy",
+        "mail": "ahana099@gmail.com"
+    },
+    {
+        "city": "delhi",
+        "gender": "male",
+        "user": 26,
+        "profile": null,
+        "name": "div dixit eofny",
+        "mail": "user67@gmail.com"
+    }
+]
+ */

@@ -3,6 +3,7 @@ package com.example.movie.auth
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -31,6 +32,12 @@ interface AuthInterface{
         @Part profile: MultipartBody.Part?
 
     ):Response<USerProfileRes>
+
+
+    @GET("accounts/create-user/")
+    suspend fun getAllUsers(
+        @Header("Authorization") token: String
+    ) : Response<List<User>>
 
 
 

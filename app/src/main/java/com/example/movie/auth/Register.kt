@@ -182,7 +182,7 @@ fun Register(
                     is RegisterState.Success -> {
                         Text(text = "Sign Up")
 
-                        rootNavController.navigate("main")
+                        rootNavController.navigate("user_detail")
                     }
                     is RegisterState.Error -> {
                         Text(text = state.message)

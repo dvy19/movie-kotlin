@@ -8,14 +8,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.movie.auth.AuthVM
+import com.example.movie.auth.GetAllUsersState
 
 // 1. Data model for user information
 data class User(
@@ -27,41 +32,24 @@ data class User(
 )
 
 
-// 2. Sample data containing 4 users
-val sampleUsers = listOf(
-    User(
-        id = 1,
-        name = "Aarav Sharma",
-        email = "aarav.sharma@example.com",
-        role = "Android Developer"
-    ),
-    User(
-        id = 2,
-        name = "Priya Verma",
-        email = "priya.verma@example.com",
-        role = "UI/UX Designer"
-    ),
-    User(
-        id = 3,
-        name = "Rohan Gupta",
-        email = "rohan.gupta@example.com",
-        role = "Backend Engineer"
-    ),
-    User(
-        id = 4,
-        name = "Ananya Iyer",
-        email = "ananya.iyer@example.com",
-        role = "Product Manager"
-    )
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllUsersScreen(
     mainNavController: NavController,
-    users: List<User> = sampleUsers,
+
     onMessageClick: (User) -> Unit = {}
 ) {
+
+    val viewModel:AuthVM=viewModel()
+
+    LaunchedEffect(Unit){
+        viewModel.getAllUsers()
+    }
+
+    val getAllUsersState by viewModel.getAllUsersState.collectAsState()
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,31 +61,50 @@ fun AllUsersScreen(
         }
     ) { innerPadding ->
 
-        if (users.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No users available")
+        when(val state=getAllUsersState){
+
+            is GetAllUsersState.Idle -> {
+
             }
-        }
-            else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(users) { user ->
-                        UserCard(user = user, onMessageClick = { onMessageClick(user) })
-                    }
+            is GetAllUsersState.Loading -> {
+
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No users available")
                 }
 
             }
+
+            is GetAllUsersState.Success -> {
+
+                val users = state.data
+
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(users) { user ->
+                            UserCard(user = user, onMessageClick = { })
+                        }
+                    }
+
+
+            }
+
+            is GetAllUsersState.Error -> {
+
+            }
+
+        }
     }
 }
 
 @Composable
 fun UserCard(
-    user: User,
+    user: com.example.movie.auth.User,
     onMessageClick: () -> Unit
 ) {
     Card(
@@ -126,11 +133,10 @@ fun UserCard(
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = user.profileIcon,
-                        contentDescription = "${user.name}'s Profile",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
+                    AsyncImage(
+                        model = user.profile,
+                        contentDescription = "Profile picture of ${user.name}",
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
@@ -146,12 +152,12 @@ fun UserCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = user.role,
+                        text = user.name,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = user.email,
+                        text = user.mail,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

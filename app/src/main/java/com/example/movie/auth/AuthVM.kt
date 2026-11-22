@@ -11,6 +11,13 @@ import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
 
+sealed class GetAllUsersState{
+    object Idle : GetAllUsersState()
+    object Loading : GetAllUsersState()
+    data class Success(val data: List<User>) : GetAllUsersState()
+    data class Error(val message: String) : GetAllUsersState()
+}
+
 sealed class RegisterState{
     object Idle : RegisterState()
     object Loading : RegisterState()
@@ -25,6 +32,8 @@ sealed class CreateUserState{
     data class Error(val message: String) : CreateUserState()
 }
 
+
+
 class AuthVM(application: Application): AndroidViewModel(application){
 
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
@@ -32,6 +41,10 @@ class AuthVM(application: Application): AndroidViewModel(application){
 
     private val _createUserState = MutableStateFlow<CreateUserState>(CreateUserState.Idle)
     val createUserState = _createUserState.asStateFlow()
+
+    private val _getAllUsersState = MutableStateFlow<GetAllUsersState>(GetAllUsersState.Idle)
+    val getAllUsersState = _getAllUsersState.asStateFlow()
+
 
 
     val sessionManager= SessionManager(application)
@@ -141,6 +154,25 @@ class AuthVM(application: Application): AndroidViewModel(application){
 
                 _createUserState.value = CreateUserState.Error(e.message ?: "Unknown error")
                 }
+        }
+
+    }
+
+    fun getAllUsers(){
+        _getAllUsersState.value = GetAllUsersState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repo.getAllUsers()
+                if(response.isSuccessful && response.body()!=null) {
+                    _getAllUsersState.value = GetAllUsersState.Success(response.body()!!)
+                }
+                else{
+                    _getAllUsersState.value = GetAllUsersState.Error(response.message())
+                }
+            }
+            catch (e: Exception) {
+                _getAllUsersState.value = GetAllUsersState.Error(e.message ?: "Unknown error")
+            }
         }
 
     }

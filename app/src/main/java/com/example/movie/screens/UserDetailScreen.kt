@@ -77,7 +77,7 @@ fun UserDetailScreen(
 
     val cityOptions = listOf("Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata")
 
-    val genderOptions = listOf("Male", "Female", "Other")
+    val genderOptions = listOf("male", "female", "Other")
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 

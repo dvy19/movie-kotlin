@@ -51,7 +51,9 @@ fun RootNav(innerPadding: PaddingValues) {
         }
 
         composable(Screens.MainScreen.route){
-            MainScreen(innerPadding)
+            MainScreen(
+                rootNavController,
+                innerPadding)
 
         }
 
