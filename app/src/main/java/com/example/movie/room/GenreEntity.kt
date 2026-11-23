@@ -13,3 +13,17 @@ data class GenreEntity (
 
     var name:String
 )
+
+@Entity(tableName = "saved_movie")
+data class MovieEntity(
+
+    @PrimaryKey
+    var movie_id:Int,
+    var image:String,
+    var adult: Boolean,
+    var title:String,
+    var releaseDate: String,
+    var originalLanguage: String,
+    var voteAverage: Double,
+    var voteCount: Int
+)

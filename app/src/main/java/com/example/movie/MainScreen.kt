@@ -27,7 +27,6 @@ import com.example.movie.screens.ProfileScreen
 import com.example.movie.screens.SurveyDetailScreen
 import com.example.movie.screens.UserChatScreen
 import com.example.movie.screens.sampleUser
-import com.example.movie.screens.sampleUsers
 
 @Composable
 fun MainScreen(
@@ -130,7 +129,6 @@ fun MainScreen(
             composable(Screens.AllUsersScreen.route){
                 AllUsersScreen(
                     mainNavController,
-                    users = sampleUsers,
                     onMessageClick = { }
                 )
             }

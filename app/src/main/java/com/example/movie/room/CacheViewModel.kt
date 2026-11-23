@@ -23,6 +23,12 @@ sealed class GetCacheGenreState{
 }
 
 
+sealed class SaveMovieState{
+    data class Success(val data: MovieEntity): SaveMovieState()
+    data class Error(val message: String): SaveMovieState()
+    object Loading: SaveMovieState()
+    object Empty: SaveMovieState()
+}
 
 class CacheViewModel(
     private val repo: CacheRepo
@@ -33,6 +39,12 @@ class CacheViewModel(
 
     private val _getGenre = MutableStateFlow<GetCacheGenreState>(GetCacheGenreState.Empty)
     val getGenre: StateFlow<GetCacheGenreState> = _getGenre.asStateFlow()
+
+
+    private val _saveMovie = MutableStateFlow<SaveMovieState>(SaveMovieState.Empty)
+    val saveMovie: StateFlow<SaveMovieState> = _saveMovie.asStateFlow()
+
+
 
 
     fun insertGenres(genres: List<GenreEntity>){
@@ -72,7 +84,51 @@ class CacheViewModel(
         }
 
     }
+
+    fun insertMovies(
+        movie_id: Int,
+        image: String,
+        adult: Boolean,
+        title: String,
+        releaseDate: String,
+        originalLanguage: String,
+        voteAverage: Double,
+        voteCount: Int
+    ) {
+        viewModelScope.launch {
+            _saveMovie.value = SaveMovieState.Loading
+            try {
+
+                val entity = MovieEntity(
+                    movie_id = movie_id,
+                    image = image,
+                    adult = adult,
+                    title = title,
+                    releaseDate = releaseDate,
+                    originalLanguage = originalLanguage,
+                    voteAverage = voteAverage,
+                    voteCount = voteCount
+                )
+                repo.insertMovie(
+                    movie_id = movie_id,
+                    image = image,
+                    adult = adult,
+                    title = title,
+                    releaseDate = releaseDate,
+                    originalLanguage = originalLanguage,
+                    voteAverage = voteAverage,
+                    voteCount = voteCount
+                ) // or pass individual fields if repo takes those
+                _saveMovie.value = SaveMovieState.Success(entity)
+
+
+            } catch (e: Exception) {
+                _saveMovie.value = SaveMovieState.Error(e.message ?: "Failed to save movie")
+            }
+        }
     }
+    }
+
 
 
 

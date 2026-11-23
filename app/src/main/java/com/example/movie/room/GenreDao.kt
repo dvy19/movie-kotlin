@@ -14,5 +14,16 @@ interface GenreDao {
     @Query("SELECT * FROM genre_table")
     suspend fun getAllGenre(): List<GenreEntity>
 
+}
+
+
+@Dao
+interface MovieDao{
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovie(movie:MovieEntity)
+
+    @Query("SELECT * FROM saved_movie")
+    suspend fun getAllMovies():List<MovieEntity>
 
 }

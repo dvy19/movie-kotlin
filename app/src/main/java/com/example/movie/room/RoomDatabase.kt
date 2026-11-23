@@ -9,12 +9,14 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         GenreEntity::class
+
     ],
-    version = 1
+    version = 2
 )
 abstract class MovieDatabase : androidx.room.RoomDatabase() {
 
     abstract fun genreDao(): GenreDao
+    abstract fun movieDao(): MovieDao
 
 }
 

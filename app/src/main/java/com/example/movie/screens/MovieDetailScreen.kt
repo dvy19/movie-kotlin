@@ -55,11 +55,16 @@ import coil.compose.AsyncImage
 import java.util.Locale
 
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movie.movie.MovieDetailState
 import com.example.movie.movie.MovieVM
 import com.example.movie.movie.PopularMovie
+import com.example.movie.room.CacheRepo
+import com.example.movie.room.CacheViewModel
+import com.example.movie.room.CacheVmFac
+import com.example.movie.room.DatabaseProvider
 
 private val MovieDarkColorScheme = darkColorScheme(
     primary = Color(0xFFE50914),
@@ -76,6 +81,7 @@ private val MovieDarkColorScheme = darkColorScheme(
     onSurfaceVariant = Color(0xFFB8BDC9),
     outline = Color(0xFF3A3F4E)
 )
+
 fun mapGenreIds(ids: List<Int>): List<String> {
     val genreMap = mapOf(
         28 to "Action",
@@ -110,6 +116,17 @@ fun MovieDetailScreen(
     val viewModel: MovieVM=viewModel()
     val movieDetailState by viewModel.movieDetailState.collectAsState()
 
+    val context = LocalContext.current
+    val cacheVm: CacheViewModel = viewModel {
+        val db = DatabaseProvider.getDatabase(context)
+        CacheViewModel(
+            CacheRepo(
+                genreDao = db.genreDao(),
+                movieDao = db.movieDao()
+            )
+        )
+    }
+
     LaunchedEffect(Unit) {
 
         movie_id?.let{
@@ -127,7 +144,22 @@ fun MovieDetailScreen(
                 isSavedOffline = false,
                 isLiked = false,
                 onBackClick = { mainNavController.popBackStack() },
-                onSaveOfflineClick = { },
+                onSaveOfflineClick = {
+
+                    cacheVm.insertMovies(
+                        movie_id = state.data.id,
+                        image = state.data.posterPath.toString(),
+                        adult = state.data.adult,
+                        title = state.data.title,
+                        releaseDate = state.data.releaseDate
+                        ?: "N/A",
+                        originalLanguage = state.data.originalLanguage,
+                        voteAverage = state.data.voteAverage,
+                        voteCount = state.data.voteCount
+
+                    )
+
+                },
                 onLikeClick = { }
             )
 
