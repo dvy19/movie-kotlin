@@ -30,6 +30,13 @@ sealed class SaveMovieState{
     object Empty: SaveMovieState()
 }
 
+sealed class GetSavedMovieState{
+    data class Success(val data: List<MovieEntity>): GetSavedMovieState()
+    data class Error(val message: String): GetSavedMovieState()
+    object Loading: GetSavedMovieState()
+    object Empty: GetSavedMovieState()
+}
+
 class CacheViewModel(
     private val repo: CacheRepo
 ):ViewModel(){
@@ -43,6 +50,9 @@ class CacheViewModel(
 
     private val _saveMovie = MutableStateFlow<SaveMovieState>(SaveMovieState.Empty)
     val saveMovie: StateFlow<SaveMovieState> = _saveMovie.asStateFlow()
+
+    private val _getMovie = MutableStateFlow<GetSavedMovieState>(GetSavedMovieState.Empty)
+    val getMovie: StateFlow<GetSavedMovieState> = _getMovie.asStateFlow()
 
 
 
@@ -127,7 +137,27 @@ class CacheViewModel(
             }
         }
     }
+
+    fun get_movies(){
+        viewModelScope.launch {
+
+            try{
+                val response = repo.getAllMovies()
+                _getMovie.value= GetSavedMovieState.Success(response)
+            }
+            catch (e: Exception){
+                _getMovie.value = GetSavedMovieState.Error(e.message ?: "An error occurred")
+            }
+
+
+
+        }
+
     }
+
+
+
+}
 
 
 

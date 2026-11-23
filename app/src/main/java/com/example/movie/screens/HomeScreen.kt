@@ -102,6 +102,7 @@ fun HomeScreen(
         factory = CacheVmFac(
             repository = CacheRepo(
                 genreDao = DatabaseProvider.getDatabase(context).genreDao()
+                ,movieDao = DatabaseProvider.getDatabase(context).movieDao()
             )
         )
     )
