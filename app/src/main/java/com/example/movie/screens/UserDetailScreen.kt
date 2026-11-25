@@ -59,10 +59,26 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.movie.auth.AuthVM
 import com.example.movie.auth.CreateUserState
+import com.example.movie.auth.SessionManager
 import com.example.movie.auth.UserProfileReq
 import com.example.movie.createImagePart
 import java.io.File
 
+data class CountryOption(
+    val code: String, // ISO 3166-1 alpha-2 code for TMDb (e.g., "IN", "US")
+    val name: String  // Label shown in the dropdown
+)
+
+val supportedCountries = listOf(
+    CountryOption(code = "IN", name = "India"),
+    CountryOption(code = "US", name = "United States"),
+    CountryOption(code = "GB", name = "United Kingdom"),
+    CountryOption(code = "KR", name = "South Korea"),
+    CountryOption(code = "JP", name = "Japan"),
+    CountryOption(code = "FR", name = "France"),
+    CountryOption(code = "DE", name = "Germany"),
+    CountryOption(code = "CA", name = "Canada")
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +89,11 @@ fun UserDetailScreen(
 ) {
     val context = LocalContext.current
 
+    val sessionManager=SessionManager(context)
+
     val viewModel: AuthVM=viewModel()
+
+    var selectedCountryCode by remember { mutableStateOf("IN") }
 
     val cityOptions = listOf("Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata")
 
@@ -258,6 +278,14 @@ fun UserDetailScreen(
                 }
             }
 
+            CountryDropdown(
+                selectedCountryCode = selectedCountryCode,
+                onCountrySelected = { country ->
+                    selectedCountryCode = country.code
+                    // Save country.code to DataStore / Room / ViewModel so HomeScreen can fetch movies
+                }
+            )
+
             // Submit Button
             Button(
 
@@ -276,11 +304,17 @@ fun UserDetailScreen(
 
                     Log.d("m","clicked button")
 
+                    Log.d("cc",selectedCountryCode)
+
+                    sessionManager.saveCountry(selectedCountryCode)
+
+
                     viewModel.createUserProfile(
                             name=name,
                             gender=selectedGender,
                             city=selectedCity,
                             profile=imagePart,
+                            country = selectedCountryCode
                     )
 
                 },
@@ -306,12 +340,62 @@ fun UserDetailScreen(
 
                         rootNavController.navigate("main")
 
+
+
                     }
                     is CreateUserState.Error -> {
                         Text("Error")
 
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CountryDropdown(
+    selectedCountryCode: String,
+    onCountrySelected: (CountryOption) -> Unit,
+    modifier: Modifier = Modifier,
+    countries: List<CountryOption> = supportedCountries,
+    label: String = "Preferred Country"
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedCountry = countries.find { it.code == selectedCountryCode }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = selectedCountry?.name ?: "Select a country",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            countries.forEach { country ->
+                DropdownMenuItem(
+                    text = { Text("${country.name} (${country.code})") },
+                    onClick = {
+                        onCountrySelected(country)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
             }
         }
     }

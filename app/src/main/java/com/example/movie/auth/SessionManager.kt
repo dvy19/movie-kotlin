@@ -19,6 +19,17 @@ class SessionManager(context: Context) {
     // ✅ Logout (clear session)
     fun logout() { prefs.edit().clear().apply() }
 
+    fun saveCountry(country: String){
+        prefs.edit()
+            .putString("country", country)
+            .apply()
+
+    }
+
+    fun getCountry(): String? {
+        return prefs.getString("country" , null)
+    }
+
 
     fun saveTokens(access: String) {
         prefs.edit()

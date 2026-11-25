@@ -4,11 +4,11 @@ package com.example.movie.room
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
-import androidx.room.RoomDatabase
 
 @Database(
     entities = [
-        GenreEntity::class
+        GenreEntity::class,
+        MovieEntity::class
 
     ],
     version = 2

@@ -29,6 +29,7 @@ class AuthRepo(
         name:String,
         gender:String,
         city:String,
+        country:String,
         profile: MultipartBody.Part?
     ):Response<USerProfileRes>{
         val token="Bearer ${sessionManager.getAccessToken()}"
@@ -38,7 +39,8 @@ class AuthRepo(
             name=name,
             gender=gender,
             city=city,
-            profile=profile
+            profile=profile,
+            country=country
         )
     }
 

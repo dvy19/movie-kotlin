@@ -64,8 +64,10 @@ class MovieRepo {
         language: String,
         sortBy: String = "popularity.desc",
         originalLanguage: String? = null,
+        with_origin_country:String,
         includeAdult: Boolean = false,
         releaseYear: Int? = null,
+
         releaseDateGte: String? = null,
         releaseDateLte: String? = null
     ) : Response<PopularMovieResponse>{
@@ -75,6 +77,7 @@ class MovieRepo {
             language = language,
             sortBy = sortBy,
             originalLanguage = originalLanguage,
+            with_origin_country = with_origin_country,
             includeAdult = includeAdult,
             releaseYear = releaseYear,
             releaseDateGte = releaseDateGte,

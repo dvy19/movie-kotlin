@@ -112,6 +112,7 @@ class AuthVM(application: Application): AndroidViewModel(application){
         name:String,
         gender:String,
         city:String,
+        country:String,
         profile: MultipartBody.Part?
     ){
         _createUserState.value = CreateUserState.Loading
@@ -122,7 +123,8 @@ class AuthVM(application: Application): AndroidViewModel(application){
                     name=name,
                     gender=gender,
                     city=city,
-                    profile=profile
+                    profile=profile,
+                    country=country
                 )
 
                 if(response.isSuccessful && response.body()!=null) {

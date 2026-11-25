@@ -1,6 +1,7 @@
 package com.example.movie.screens
 
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import android.widget.Toast
@@ -16,12 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cases
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
@@ -34,6 +37,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -108,6 +112,8 @@ fun HomeScreen(
     )
 
     val sessionManager=SessionManager(context)
+
+    val country=sessionManager.getCountry()
 
     val commViewModel: CommViewModel= viewModel(
         factory = CommVMFac(
@@ -355,7 +361,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White)
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
@@ -436,6 +443,7 @@ fun HomeScreen(
                     }
 
 
+
                 item{
                     Row(
                         modifier = Modifier
@@ -463,6 +471,22 @@ fun HomeScreen(
                             )
                         }
                     }
+
+                    CountryPreferenceButtonRow(
+                        selectedCountryCode = country,
+
+                        onApplyCountryPreference = { code ->
+                            viewModel.get_filter_movies(
+                                with_origin_country = code
+                            )
+
+                            Log.d("cc",code)
+                        },
+
+                        onResetPreference = {
+                            // Handle preference reset
+                        }
+                    )
 
                     when(val state=popularMoviesState){
                         is GetPopularMoviesState.Loading -> {
@@ -496,6 +520,54 @@ fun HomeScreen(
 
     }
 
+}
+
+@Composable
+fun CountryPreferenceButtonRow(
+    selectedCountryCode: String?,
+    onApplyCountryPreference: (String) -> Unit,
+    onResetPreference: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = !selectedCountryCode.isNullOrBlank()
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 3.dp),
+
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedButton(
+            onClick = onResetPreference,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(text = "Reset")
+        }
+
+        Button(
+            onClick = {
+                selectedCountryCode?.let { code ->
+                    onApplyCountryPreference(code)
+                }
+            },
+            enabled = enabled,
+            modifier = Modifier.weight(2f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Public,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (!selectedCountryCode.isNullOrBlank()) {
+                    "Apply Country ($selectedCountryCode)"
+                } else {
+                    "Apply Country Preference"
+                }
+            )
+        }
+    }
 }
 
 

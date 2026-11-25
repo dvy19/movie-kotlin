@@ -40,6 +40,7 @@ interface MovieApiInterface{
         @Query("language") language: String = "en-US",
         @Query("sort_by") sortBy: String = "popularity.desc",
         @Query("with_original_language") originalLanguage: String? = null,
+        @Query("with_origin_country") with_origin_country: String? = null,
         @Query("include_adult") includeAdult: Boolean = false,
         @Query("primary_release_year") releaseYear: Int? = null,
         @Query("primary_release_date.gte") releaseDateGte: String? = null,

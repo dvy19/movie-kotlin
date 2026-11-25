@@ -29,6 +29,7 @@ interface AuthInterface{
         @Part("name") name:String,
         @Part("gender") gender:String,
         @Part("city") city:String,
+        @Part("country") country:String,
         @Part profile: MultipartBody.Part?
 
     ):Response<USerProfileRes>

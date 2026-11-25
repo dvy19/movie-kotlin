@@ -41,7 +41,8 @@ data class UserProfileReq(
     var name:String,
     var gender:String,
     var profile:String?,
-    var city:String
+    var city:String,
+    var country:String
 )
 
 data class USerProfileRes(
