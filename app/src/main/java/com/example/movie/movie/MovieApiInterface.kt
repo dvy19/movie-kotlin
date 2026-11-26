@@ -2,6 +2,7 @@ package com.example.movie.movie
 
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -46,6 +47,7 @@ interface MovieApiInterface{
         @Query("primary_release_date.gte") releaseDateGte: String? = null,
         @Query("primary_release_date.lte") releaseDateLte: String? = null
     ) : Response<PopularMovieResponse>
+
 
 
 }

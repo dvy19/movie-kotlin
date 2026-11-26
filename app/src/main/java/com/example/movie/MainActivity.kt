@@ -36,6 +36,8 @@ sealed class Screens(val route: String){
     object Login: Screens("login")
     object HomeScreen: Screens("home")
 
+    data object Settings:Screens("settings")
+
     object MainScreen:Screens("main")
 
     data object UserDetailScreen: Screens("user_detail")

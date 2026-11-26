@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movie.movie.PopularMovie
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
@@ -47,6 +48,16 @@ sealed class UserSurveyResponseState{
 }
 
 
+
+
+sealed class LikePostState{
+    object Idle : LikePostState()
+    object Loading : LikePostState()
+    data class Success(val data: Unit) : LikePostState()
+    data class Error(val message: String) : LikePostState()
+}
+
+
 class CommViewModel(
     private val repo: CommRepo
 ) : ViewModel() {
@@ -68,6 +79,33 @@ class CommViewModel(
     private val _userSurveyResponseState = MutableStateFlow<UserSurveyResponseState>(UserSurveyResponseState.Idle)
     val userSurveyResponseState = _userSurveyResponseState.asStateFlow()
 
+    private val _likePostState = MutableStateFlow<LikePostState>(LikePostState.Idle)
+    val likePostState: StateFlow<LikePostState> = _likePostState.asStateFlow()
+
+
+
+    fun like_post(
+        postId: String
+    ){
+        _likePostState.value = LikePostState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repo.likePost(
+                    postId = postId
+                )
+
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        _likePostState.value = LikePostState.Success(it)
+                    } ?: throw Exception("Response body is null")
+                } else {
+                    throw Exception("Failed to fetch data")
+                }
+            } catch (e: Exception) {
+                _likePostState.value = LikePostState.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
 
 
 

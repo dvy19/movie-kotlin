@@ -51,6 +51,13 @@ interface CommApiInterface {
     ): Response<List<UserSurveyResponse>>
 
 
+    @POST("movies/posts/like/{post_id}")
+    suspend fun likePost(
+        @Path("post_id") postId: String
+    ): Response<Unit>
+
+
+
 
 
 

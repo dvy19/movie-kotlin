@@ -24,6 +24,7 @@ import com.example.movie.screens.MovieFeedScreen
 import com.example.movie.screens.MovieFilterState
 import com.example.movie.screens.MovieGridScreen
 import com.example.movie.screens.ProfileScreen
+import com.example.movie.screens.Settings
 import com.example.movie.screens.SurveyDetailScreen
 import com.example.movie.screens.UserChatScreen
 import com.example.movie.screens.sampleUser
@@ -68,6 +69,13 @@ fun MainScreen(
                     onResetFilters = { }
 
                 )
+            }
+
+            composable(Screens.Settings.route){
+                Settings(
+                    mainNavController
+                )
+
             }
 
             composable(Screens.Login.route){
@@ -120,7 +128,7 @@ fun MainScreen(
             composable(Screens.ProfileScreen.route){
                 ProfileScreen(
                     user = sampleUser,
-                    onSettingsClick = { },
+                    onSettingsClick = { mainNavController.navigate("settings")},
                     mainNavController
                 )
             }

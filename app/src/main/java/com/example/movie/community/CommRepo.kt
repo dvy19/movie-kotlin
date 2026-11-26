@@ -69,5 +69,14 @@ class CommRepo(
     }
 
 
+    suspend fun likePost(
+        postId: String
+    ): Response<Unit> {
+        return api.likePost(
+            postId = postId
+        )
+    }
+
+
 
 }

@@ -44,9 +44,6 @@ sealed class MovieDetailState{
 }
 
 
-
-
-
 class MovieVM : ViewModel() {
 
     private val repo = MovieRepo()
@@ -62,6 +59,7 @@ class MovieVM : ViewModel() {
 
     private val _movieDetailState = MutableStateFlow<MovieDetailState>(MovieDetailState.Idle)
     val movieDetailState: StateFlow<MovieDetailState> = _movieDetailState.asStateFlow()
+
 
 
 
@@ -258,6 +256,8 @@ class MovieVM : ViewModel() {
             }
         }
     }
+
+
 
 }
 

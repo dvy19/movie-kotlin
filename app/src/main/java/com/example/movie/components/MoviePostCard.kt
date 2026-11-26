@@ -15,11 +15,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.example.movie.community.CommViewModel
 import com.example.movie.community.Post
+import com.example.movie.movie.MovieVM
 
 
 @Composable
@@ -30,6 +35,18 @@ fun MoviePostCard(
     // Local state to make the like button immediately interactive
     var isLiked by remember { mutableStateOf(false) }
     var likeCount by remember { mutableIntStateOf(9) }
+
+    val context= LocalContext.current
+
+    val viewModel:CommViewModel = viewModel{
+        CommViewModel(
+            repo = com.example.movie.community.CommRepo(
+                sessionManager = com.example.movie.auth.SessionManager(context)
+            )
+        )
+    }
+
+
 
     ElevatedCard(
         modifier = Modifier
@@ -170,7 +187,9 @@ fun MoviePostCard(
                     onClick = {
                         isLiked = !isLiked
                         likeCount += if (isLiked) 1 else -1
-                        {  }
+                        {
+                            viewModel.like_post(post.id.toString())
+                        }
                     },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                 ) {
