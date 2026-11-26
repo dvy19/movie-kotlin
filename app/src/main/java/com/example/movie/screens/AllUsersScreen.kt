@@ -1,9 +1,11 @@
 package com.example.movie.screens
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -14,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,16 +24,12 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.movie.auth.AuthVM
 import com.example.movie.auth.GetAllUsersState
-
-// 1. Data model for user information
-data class User(
-    val id: Int,
-    val name: String,
-    val email: String,
-    val role: String,
-    val profileIcon: ImageVector = Icons.Default.Person
-)
-
+import com.example.movie.auth.User
+import com.example.movie.community.CommViewModel
+import com.example.movie.community.CreateChatRoomState
+import com.example.movie.community.GetChatRoomState
+import com.example.movie.community.InboxRes
+import com.example.movie.community.Room
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,9 +37,10 @@ data class User(
 fun AllUsersScreen(
     mainNavController: NavController,
 
-    onMessageClick: (User) -> Unit = {}
+
 ) {
 
+    /*
     val viewModel:AuthVM=viewModel()
 
     LaunchedEffect(Unit){
@@ -48,6 +48,26 @@ fun AllUsersScreen(
     }
 
     val getAllUsersState by viewModel.getAllUsersState.collectAsState()
+
+     */
+
+    val context=LocalContext.current
+
+    val vm: CommViewModel=viewModel{
+        CommViewModel(
+            repo = com.example.movie.community.CommRepo(
+                sessionManager = com.example.movie.auth.SessionManager(context)
+            )
+        )
+    }
+
+    val getChatRoomsState by vm.getChatRoomsState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.get_chat_rooms()
+    }
+
+
 
 
     Scaffold(
@@ -61,8 +81,9 @@ fun AllUsersScreen(
         }
     ) { innerPadding ->
 
-        when(val state=getAllUsersState){
+        when(val state=getChatRoomsState) {
 
+            /*
             is GetAllUsersState.Idle -> {
 
             }
@@ -87,7 +108,11 @@ fun AllUsersScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(users) { user ->
-                            UserCard(user = user, onMessageClick = { })
+                            UserCard(
+                                user = user ,
+                                mainNavController
+
+                                )
                         }
                     }
 
@@ -98,15 +123,96 @@ fun AllUsersScreen(
 
             }
 
+
+
+
+        }
+        */
+
+
+            is GetChatRoomState.Idle->{
+
+            }
+
+            is GetChatRoomState.Loading->{
+
+            }
+
+            is GetChatRoomState.Success->{
+
+                val data=state.data
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(data) { user ->
+                        SimpleUserPairCard(
+                            item= user ,
+                            mainNavController
+
+                        )
+                    }
+                }
+
+
+
+            }
+
+            is GetChatRoomState.Error->{
+
+            }
+
+
+
         }
     }
 }
 
 @Composable
 fun UserCard(
-    user: com.example.movie.auth.User,
-    onMessageClick: () -> Unit
+    user: User,
+    mainNavController: NavController
 ) {
+
+    val context= LocalContext.current
+
+    val commViewModel: CommViewModel=viewModel{
+        CommViewModel(
+            repo = com.example.movie.community.CommRepo(
+                sessionManager = com.example.movie.auth.SessionManager(context)
+            )
+        )
+    }
+
+    val createChatRoomState by commViewModel.createChatRoomState.collectAsState()
+
+    when(val state=createChatRoomState){
+        is CreateChatRoomState.Idle -> {
+
+        }
+
+        is CreateChatRoomState.Loading -> {
+
+        }
+
+        is CreateChatRoomState.Success -> {
+
+            mainNavController.navigate("user_chat_screen/${user.user}")
+
+        }
+
+        is CreateChatRoomState.Error -> {
+
+        }
+
+
+
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -168,7 +274,15 @@ fun UserCard(
 
             // Message Button (Material 3 Icon or Filled Button)
             IconButton(
-                onClick = onMessageClick,
+                onClick = {
+
+                    commViewModel.create_chat_room(
+                        com.example.movie.community.CreateRoomReq(
+                            recipient_id = user.user
+                        )
+                    )
+
+                },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -179,6 +293,45 @@ fun UserCard(
                     contentDescription = "Message ${user.name}"
                 )
             }
+        }
+    }
+
+}
+
+@Composable
+fun SimpleUserPairCard(
+    item: InboxRes,
+    mainNavController: NavController
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                mainNavController.navigate("user_chat_screen/${item.recipient_id}")
+            },
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "${item.recipient_username} ",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "Updated: ${item.updated_at}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = "Created: ${item.created_at}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

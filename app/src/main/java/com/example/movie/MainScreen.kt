@@ -56,8 +56,21 @@ fun MainScreen(
                 HomeScreen(mainNavController)
             }
 
-            composable("user_chat_screen"){
-                UserChatScreen(mainNavController)
+            composable(
+                route = "user_chat_screen/{recipientId}",
+                arguments = listOf(
+                    navArgument("recipientId") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+
+                val id = backStackEntry.arguments?.getString("recipientId")
+
+                UserChatScreen(
+                    mainNavController = mainNavController,
+                    recipientId = id
+                )
             }
 
             composable(Screens.MovieGridScreen.route) {
@@ -78,9 +91,7 @@ fun MainScreen(
 
             }
 
-            composable(Screens.Login.route){
 
-            }
 
             composable(Screens.SurveyDetailScreen.route){
                 SurveyDetailScreen(
@@ -104,6 +115,7 @@ fun MainScreen(
                     movie_id = id
                 )
             }
+
             composable(Screens.ChatScreen.route) {
                 ChatScreen(
                     mainNavController,
@@ -137,7 +149,6 @@ fun MainScreen(
             composable(Screens.AllUsersScreen.route){
                 AllUsersScreen(
                     mainNavController,
-                    onMessageClick = { }
                 )
             }
 

@@ -21,7 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.movie.auth.AuthVM
+import com.example.movie.auth.GetUserState
+import com.example.movie.auth.User
 import kotlinx.coroutines.launch
 
 data class ChatMessage(
@@ -30,11 +34,58 @@ data class ChatMessage(
     val isFromMe: Boolean,
     val time: String
 )
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun UserChatScreen(
+    recipientId: String?,
     mainNavController: NavController
 ) {
+    val vm: AuthVM = viewModel()
+
+
+    LaunchedEffect(recipientId) {
+        val id = recipientId?.toIntOrNull()
+
+        if (id != null) {
+            vm.getUserDetails(id)
+        }
+    }
+
+    val getUserState by vm.getUserState.collectAsState()
+
+
+    when(val state=getUserState){
+        is GetUserState.Idle -> {
+
+
+        }
+        is GetUserState.Loading -> {
+
+        }
+        is GetUserState.Success -> {
+
+            val data=state.data
+
+            UserChatLayout(
+                user = data
+            )
+
+        }
+        is GetUserState.Error -> {
+
+        }
+    }
+
+
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UserChatLayout(
+    user: User
+) {
+
+
+
     var messageText by remember { mutableStateOf("") }
     val messages = remember {
         mutableStateListOf(
@@ -77,7 +128,7 @@ fun UserChatScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Alex Mercer",
+                                text = user.name,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )

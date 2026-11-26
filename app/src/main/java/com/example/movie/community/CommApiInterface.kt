@@ -56,6 +56,19 @@ interface CommApiInterface {
         @Path("post_id") postId: String
     ): Response<Unit>
 
+    @POST("chats/create-room/")
+    suspend fun createChatRoom(
+        @Header("Authorization") token: String,
+        @Body body: CreateRoomReq
+    ): Response<CreateRoomRes>
+
+    @GET("chats/create-room/")
+    suspend fun getChatRooms(
+        @Header("Authorization") token: String,
+    ): Response<List<InboxRes>>
+
+
+
 
 
 

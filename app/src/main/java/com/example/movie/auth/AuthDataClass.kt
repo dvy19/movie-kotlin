@@ -55,7 +55,8 @@ data class User(
     var gender:String,
     var profile:String?,
     var city:String,
-    var mail:String
+    var mail:String,
+    var user:Int
 )
 
 

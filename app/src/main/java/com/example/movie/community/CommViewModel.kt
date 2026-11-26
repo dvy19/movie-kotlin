@@ -47,9 +47,6 @@ sealed class UserSurveyResponseState{
     data class Error(val message: String) : UserSurveyResponseState()
 }
 
-
-
-
 sealed class LikePostState{
     object Idle : LikePostState()
     object Loading : LikePostState()
@@ -57,6 +54,20 @@ sealed class LikePostState{
     data class Error(val message: String) : LikePostState()
 }
 
+sealed class CreateChatRoomState{
+    object Idle : CreateChatRoomState()
+    object Loading : CreateChatRoomState()
+    data class Success(val data: CreateRoomRes) : CreateChatRoomState()
+    data class Error(val message: String) : CreateChatRoomState()
+}
+
+sealed class GetChatRoomState{
+
+    object Idle: GetChatRoomState()
+    object Loading: GetChatRoomState()
+    data class Success(val data: List<InboxRes>): GetChatRoomState()
+    data class Error(val message: String): GetChatRoomState()
+}
 
 class CommViewModel(
     private val repo: CommRepo
@@ -81,6 +92,12 @@ class CommViewModel(
 
     private val _likePostState = MutableStateFlow<LikePostState>(LikePostState.Idle)
     val likePostState: StateFlow<LikePostState> = _likePostState.asStateFlow()
+
+    private val _createChatRoomState = MutableStateFlow<CreateChatRoomState>(CreateChatRoomState.Idle)
+    val createChatRoomState: StateFlow<CreateChatRoomState> = _createChatRoomState.asStateFlow()
+
+    private val _getChatRoomsState = MutableStateFlow<GetChatRoomState>(GetChatRoomState.Idle)
+    val getChatRoomsState: StateFlow<GetChatRoomState> = _getChatRoomsState.asStateFlow()
 
 
 
@@ -289,6 +306,65 @@ class CommViewModel(
         }
 
     }
+
+    fun create_chat_room(
+        request: CreateRoomReq
+    ){
+        _createChatRoomState.value = CreateChatRoomState.Loading
+        viewModelScope.launch {
+
+            try {
+                val response = repo.createChatRoom(
+                    request
+                )
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        _createChatRoomState.value = CreateChatRoomState.Success(it)
+                    } ?: throw Exception("Response body is null")
+                    } else {
+                    throw Exception("Failed to fetch data")
+                }
+            } catch (e: Exception) {
+                _createChatRoomState.value = CreateChatRoomState.Error(e.message ?: "An error occurred")
+                Log.d("response",e.toString())
+                Log.d("response",e.message.toString())
+                Log.d("response",e.stackTraceToString())
+            }
+        }
+
+    }
+
+    fun get_chat_rooms(){
+        _getChatRoomsState.value = GetChatRoomState.Loading
+
+        viewModelScope.launch {
+
+            try {
+                val response = repo.getChatRooms()
+                Log.d("response",response.toString())
+                Log.d("response",response.body().toString())
+                Log.d("response",response.isSuccessful.toString())
+                Log.d("response",response.code().toString())
+
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        _getChatRoomsState.value = GetChatRoomState.Success(it)
+                    } ?: throw Exception("Response body is null")
+                } else {
+                    throw Exception("Failed to fetch data")
+                }
+            }
+                catch (e: Exception) {
+                    Log.d("response",e.toString())
+                Log.d("response",e.message.toString())
+                Log.d("response",e.stackTraceToString())
+                _addPostState.value = AddPostState.Error(e.message ?: "An error occurred")
+
+                }
+        }
+
+        }
+
 
 
 

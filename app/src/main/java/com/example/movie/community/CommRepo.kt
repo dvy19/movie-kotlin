@@ -77,6 +77,22 @@ class CommRepo(
         )
     }
 
+    suspend fun createChatRoom(
+        request: CreateRoomReq
+    ): Response<CreateRoomRes> {
+        return api.createChatRoom(
+            token = "Bearer $token",
+            request
+        )
+    }
+
+    suspend fun getChatRooms(): Response<List<InboxRes>> {
+        return api.getChatRooms(
+            token = "Bearer $token"
+        )
+    }
+
+
 
 
 }

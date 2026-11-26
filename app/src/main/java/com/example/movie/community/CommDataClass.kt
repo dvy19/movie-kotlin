@@ -266,3 +266,56 @@ data class UserSurveyResponse(
     @SerializedName("has_attended")
     val hasAttended: Boolean
 )
+
+data class CreateRoomReq(
+    var recipient_id:Int,
+)
+
+/*
+{
+    "message": "Chat room created",
+    "created": true,
+    "room": {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "user1": "divya",
+        "user2": "rahul",
+        "created_at": "2026-11-26T12:00:00Z",
+        "updated_at": "2026-11-26T12:00:00Z"
+    }
+}
+ */
+data class CreateRoomRes(
+
+    var message:String,
+    var created:Boolean,
+    var room:Room
+
+
+)
+
+data class Room(
+    var id:String,
+    var user1:String,
+    var user2:String,
+    var created_at:String,
+    var updated_at:String
+
+)
+
+/*
+ {
+        "room_id": "550e8400-e29b-41d4-a716-446655440000",
+        "recipient_id": 5,
+        "recipient_username": "rahul",
+        "created_at": "2026-11-25T10:00:00Z",
+        "updated_at": "2026-11-26T12:00:00Z"
+    },
+ */
+data class InboxRes(
+    var room_id:String,
+    var recipient_id:Int,
+    var recipient_username:String,
+    var created_at:String,
+    var updated_at:String
+
+)

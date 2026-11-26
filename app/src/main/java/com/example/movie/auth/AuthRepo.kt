@@ -53,5 +53,14 @@ class AuthRepo(
 
     }
 
+    suspend fun getUserDetails(id:Int):Response<User> {
+        val token = "Bearer ${sessionManager.getAccessToken()}"
+        Log.d("m", token)
+        return api.getUserDetails(
+            token = token,
+            id = id
+        )
+    }
+
 
 }

@@ -33,6 +33,12 @@ sealed class CreateUserState{
 }
 
 
+sealed class GetUserState{
+    object Idle : GetUserState()
+    object Loading : GetUserState()
+    data class Success(val data: User) : GetUserState()
+    data class Error(val message: String) : GetUserState()
+}
 
 class AuthVM(application: Application): AndroidViewModel(application){
 
@@ -44,6 +50,10 @@ class AuthVM(application: Application): AndroidViewModel(application){
 
     private val _getAllUsersState = MutableStateFlow<GetAllUsersState>(GetAllUsersState.Idle)
     val getAllUsersState = _getAllUsersState.asStateFlow()
+
+    private val _getUserState = MutableStateFlow<GetUserState>(GetUserState.Idle)
+    val getUserState = _getUserState.asStateFlow()
+
 
 
 
@@ -178,6 +188,25 @@ class AuthVM(application: Application): AndroidViewModel(application){
         }
 
     }
+
+    fun getUserDetails(id:Int){
+        _getUserState.value = GetUserState.Loading
+
+        viewModelScope.launch {
+            try {
+                val response = repo.getUserDetails(id)
+                if(response.isSuccessful && response.body()!=null) {
+                    _getUserState.value = GetUserState.Success(response.body()!!)
+                }
+                else{
+                    _getUserState.value = GetUserState.Error(response.message())
+                }
+            }
+            catch (e: Exception) {
+                _getUserState.value = GetUserState.Error(e.message ?: "Unknown error")
+            }
+        }
+            }
 
 
 }
